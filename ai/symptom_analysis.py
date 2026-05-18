@@ -25,7 +25,7 @@ def analyze_symptoms(symptoms):
                 "role": "user",
                 "content": prompt,
             }
-        ],
+        ], 
         model="llama-3.1-8b-instant",
     )
 

@@ -27,5 +27,6 @@ class Case(db.Model):
     danger_level = db.Column(db.String(20), nullable=False)
 
     status = db.Column(db.String(50), default="Pending")
+    
 
     created_at = db.Column(db.DateTime, server_default=db.func.now())
