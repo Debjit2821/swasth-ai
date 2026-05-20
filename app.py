@@ -225,9 +225,7 @@ def book_appointment():
         supervisors=supervisors
     )
 
-# HOME CHATBOT
-@app.route("/home", methods=["GET", "POST"])
-@login_required
+
 # HOME CHATBOT
 @app.route("/home", methods=["GET", "POST"])
 @login_required
