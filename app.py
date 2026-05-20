@@ -1,3 +1,5 @@
+from unittest import result
+
 from flask import Flask, flash, render_template, request, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from authlib.integrations.flask_client import OAuth
@@ -371,15 +373,16 @@ def home():
         user_id=current_user.id,
         status="Pending"
     ).first()
+
     # DEFAULT STAGE
 
     current_stage = "collecting_symptoms"
-    
+
     if active_case and active_case.conversation_stage:
-    
+
         current_stage = (
             active_case.conversation_stage
-    )
+        )
 
     # -----------------------------------
     # POST REQUEST
@@ -387,19 +390,24 @@ def home():
 
     if request.method == "POST":
 
-        symptoms = request.form["symptoms"].strip()
+        symptoms = request.form[
+            "symptoms"
+        ].strip()
 
         # EMPTY MESSAGE
 
         if not symptoms:
 
-            return redirect(url_for("home"))
+            return redirect(
+                url_for("home")
+            )
 
         # -----------------------------------
         # SIMPLE NON-MEDICAL WORDS
         # -----------------------------------
 
         non_medical_keywords = [
+
             "hello",
             "hi",
             "hey",
@@ -437,20 +445,16 @@ Please describe your medical symptoms so I can assist you.
             ).all()
 
             return render_template(
+
                 "index.html",
-                user_cases=user_cases
-            )
 
-        # -----------------------------------
-        # CURRENT STAGE
-        # -----------------------------------
+                result=result,
 
-        current_stage = "collecting_symptoms"
+                symptoms=symptoms,
 
-        if active_case:
+                user_cases=user_cases,
 
-            current_stage = (
-                active_case.conversation_stage
+                active_case=active_case
             )
 
         # -----------------------------------
@@ -464,6 +468,7 @@ Please describe your medical symptoms so I can assist you.
             if active_case and active_case.symptoms:
 
                 conversation_context = (
+
                     active_case.symptoms
                     + "\n" +
                     symptoms
@@ -484,15 +489,11 @@ Do you have any other symptoms? (yes/no)
 
         elif current_stage == "asking_more_symptoms":
 
-            # USER HAS MORE SYMPTOMS
-
             if symptoms.lower() == "yes":
 
                 result = """
 Please describe your additional symptoms.
 """
-
-            # USER HAS NO MORE SYMPTOMS
 
             elif symptoms.lower() == "no":
 
@@ -503,8 +504,6 @@ Please describe your additional symptoms.
                 result = """
 Would you like an Online or Offline consultation?
 """
-
-            # USER ADDS MORE SYMPTOMS
 
             else:
 
@@ -566,157 +565,153 @@ Example:
 """
 
         # -----------------------------------
-# STAGE 5
-# -----------------------------------
+        # STAGE 5
+        # -----------------------------------
 
-    elif current_stage == "appointment_time":
+        elif current_stage == "appointment_time":
 
-        appointment_time = symptoms
+            appointment_time = symptoms
 
-        specialist = "General Physician"
+            specialist = "General Physician"
 
-        if "Cardiologist" in active_case.ai_response:
+            if "Cardiologist" in active_case.ai_response:
 
-            specialist = "Cardiologist"
+                specialist = "Cardiologist"
 
-        elif "Dermatologist" in active_case.ai_response:
+            elif "Dermatologist" in active_case.ai_response:
 
-            specialist = "Dermatologist"
+                specialist = "Dermatologist"
 
-        elif "Psychiatrist" in active_case.ai_response:
+            elif "Psychiatrist" in active_case.ai_response:
 
-            specialist = "Psychiatrist"
+                specialist = "Psychiatrist"
 
-        elif "Neurologist" in active_case.ai_response:
+            elif "Neurologist" in active_case.ai_response:
 
-            specialist = "Neurologist"
+                specialist = "Neurologist"
 
-        # FIND DOCTOR
-
-        doctor = User.query.filter_by(
-
-            role="supervisor",
-
-            specialization=specialist,
-
-            approved=True
-
-        ).first()
-
-        # FALLBACK
-
-        if not doctor:
+            # FIND DOCTOR
 
             doctor = User.query.filter_by(
 
                 role="supervisor",
 
-                specialization="General Physician",
+                specialization=specialist,
 
                 approved=True
 
             ).first()
 
-        # CHECK EXISTING APPOINTMENT
+            # FALLBACK
 
-        existing_appointment = (
-            Appointment.query.filter_by(
-                patient_id=current_user.id,
-                status="Scheduled"
-            ).first()
-        )
+            if not doctor:
 
-        if not existing_appointment and doctor:
+                doctor = User.query.filter_by(
 
-            # GENERATE OTP
+                    role="supervisor",
 
-            otp = generate_otp()
+                    specialization="General Physician",
 
-            # CREATE APPOINTMENT
+                    approved=True
 
-            appointment = Appointment(
+                ).first()
 
-                patient_id=current_user.id,
+            # EXISTING APPOINTMENT
 
-                supervisor_id=doctor.id,
-
-                case_id=active_case.id,
-
-                appointment_date=(
-                    active_case.appointment_selected_date
-                ),
-
-                appointment_time=appointment_time,
-
-                meeting_otp=otp,
-
-                otp_verified=False,
-
-                status="Scheduled"
+            existing_appointment = (
+                Appointment.query.filter_by(
+                    patient_id=current_user.id,
+                    status="Scheduled"
+                ).first()
             )
 
-            db.session.add(appointment)
+            if not existing_appointment and doctor:
 
-            # NOTIFICATION
+                otp = generate_otp()
 
-            notification = Notification(
+                appointment = Appointment(
 
-                user_id=current_user.id,
+                    patient_id=current_user.id,
 
-                message=f"""
-    Appointment scheduled with
-    Dr. {doctor.name}
-    on {active_case.appointment_selected_date}
-    at {appointment_time}.
-    """
-            )
+                    supervisor_id=doctor.id,
 
-            db.session.add(notification)
+                    case_id=active_case.id,
 
-            # RESULT MESSAGE
+                    appointment_date=(
+                        active_case.appointment_selected_date
+                    ),
 
-            result = f"""
-    Appointment Confirmed ✅
+                    appointment_time=appointment_time,
 
-    Doctor:
-    Dr. {doctor.name}
+                    meeting_otp=otp,
 
-    Specialization:
-    {doctor.specialization}
+                    otp_verified=False,
 
-    Mode:
-    {active_case.appointment_mode}
+                    status="Scheduled"
+                )
 
-    Date:
-    {active_case.appointment_selected_date}
+                db.session.add(
+                    appointment
+                )
 
-    Time:
-    {appointment_time}
+                notification = Notification(
 
-    MEETING OTP:
-    {otp}
+                    user_id=current_user.id,
 
-    Please share this OTP with your doctor during consultation.
+                    message=f"""
+Appointment scheduled with
+Dr. {doctor.name}
+on {active_case.appointment_selected_date}
+at {appointment_time}.
+"""
+                )
 
-    Status:
-    Scheduled
-    """
+                db.session.add(
+                    notification
+                )
 
-            active_case.conversation_stage = (
-                "appointment_confirmed"
-            )
+                result = f"""
+Appointment Confirmed ✅
 
-        else:
+Doctor:
+Dr. {doctor.name}
 
-            result = """
-    You already have an active appointment.
+Specialization:
+{doctor.specialization}
+
+Mode:
+{active_case.appointment_mode}
+
+Date:
+{active_case.appointment_selected_date}
+
+Time:
+{appointment_time}
+
+MEETING OTP:
+{otp}
+
+Please share this OTP with your doctor during consultation.
+
+Status:
+Scheduled
+"""
+
+                active_case.conversation_stage = (
+                    "appointment_confirmed"
+                )
+
+            else:
+
+                result = """
+You already have an active appointment.
 """
 
         # -----------------------------------
         # FOLLOW-UP
         # -----------------------------------
 
-    elif current_stage == "follow_up":
+        elif current_stage == "follow_up":
 
             previous_context = f"""
 Previous Symptoms:
@@ -749,7 +744,7 @@ Based on your current condition:
         # FOLLOW-UP COMPLETE
         # -----------------------------------
 
-    elif current_stage == "follow_up_complete":
+        elif current_stage == "follow_up_complete":
 
             if "close" in symptoms.lower():
 
@@ -777,7 +772,8 @@ Please describe your current symptoms.
         # DANGER DETECTION
         # -----------------------------------
 
-    high_keywords = [
+        high_keywords = [
+
             "heart attack",
             "stroke",
             "breathing difficulty",
@@ -786,7 +782,8 @@ Please describe your current symptoms.
             "unconscious"
         ]
 
-    medium_keywords = [
+        medium_keywords = [
+
             "fever",
             "infection",
             "vomiting",
@@ -794,13 +791,13 @@ Please describe your current symptoms.
             "dizziness"
         ]
 
-    for word in high_keywords:
+        for word in high_keywords:
 
             if word in result.lower():
 
                 danger_level = "High"
 
-    for word in medium_keywords:
+        for word in medium_keywords:
 
             if (
                 word in result.lower()
@@ -813,15 +810,14 @@ Please describe your current symptoms.
         # UPDATE EXISTING CASE
         # -----------------------------------
 
-    if active_case:
+        if active_case:
 
             medical_stages = [
+
                 "collecting_symptoms",
                 "asking_more_symptoms",
                 "follow_up"
             ]
-
-            # SAVE ONLY REAL MEDICAL SYMPTOMS
 
             if current_stage in medical_stages:
 
@@ -835,11 +831,7 @@ Please describe your current symptoms.
 
                     active_case.symptoms = symptoms
 
-            # UPDATE RESPONSE
-
             active_case.ai_response = result
-
-            # UPDATE SUMMARY
 
             active_case.ai_summary = (
                 generate_case_summary(
@@ -847,15 +839,13 @@ Please describe your current symptoms.
                 )
             )
 
-            active_case.danger_level = danger_level
-
-            # INIT CHAT HISTORY
+            active_case.danger_level = (
+                danger_level
+            )
 
             if not active_case.chat_history:
 
                 active_case.chat_history = ""
-
-            # SAVE CHAT
 
             active_case.chat_history += f"""
 ||USER||
@@ -867,8 +857,6 @@ Please describe your current symptoms.
 ||END||
 """
 
-            # MOVE STAGE
-
             if current_stage == "collecting_symptoms":
 
                 active_case.conversation_stage = (
@@ -879,11 +867,9 @@ Please describe your current symptoms.
         # CREATE NEW CASE
         # -----------------------------------
 
-            else:
+        else:
 
-                active_case = Case(
-
-                # SAVE ONLY REAL SYMPTOMS
+            active_case = Case(
 
                 symptoms=(
                     symptoms
@@ -918,7 +904,7 @@ Please describe your current symptoms.
 
             db.session.add(active_case)
 
-            db.session.commit()
+        db.session.commit()
 
     # -----------------------------------
     # LOAD CASES
@@ -929,8 +915,16 @@ Please describe your current symptoms.
     ).all()
 
     return render_template(
+
         "index.html",
-        user_cases=user_cases
+
+        result=result,
+
+        symptoms=symptoms,
+
+        user_cases=user_cases,
+
+        active_case=active_case
     )
 @app.route("/supervisor")
 @login_required
