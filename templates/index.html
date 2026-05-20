@@ -35,6 +35,8 @@
             padding: 12px 18px;
             border-radius: 18px 18px 0px 18px;
             max-width: 70%;
+            margin-left: auto;
+            margin-bottom: 15px;
             word-wrap: break-word;
         }
 
@@ -45,6 +47,7 @@
             padding: 12px 18px;
             border-radius: 18px 18px 18px 0px;
             max-width: 70%;
+            margin-bottom: 15px;
             word-wrap: break-word;
             box-shadow: 0px 2px 8px rgba(0,0,0,0.08);
         }
@@ -55,11 +58,6 @@
 
         textarea {
             resize: none;
-        }
-
-        .chat-title {
-            font-weight: bold;
-            font-size: 22px;
         }
 
         pre {
@@ -74,11 +72,9 @@
 
 <body>
 
-    <!-- NAVBAR -->
-
     <nav class="navbar navbar-dark bg-primary px-4">
 
-        <span class="navbar-brand chat-title">
+        <span class="navbar-brand">
 
             SWASTH-AI Medical Assistant
 
@@ -104,8 +100,6 @@
 
     </nav>
 
-    <!-- CHAT CONTAINER -->
-
     <div class="chat-container">
 
         <div class="chat-box"
@@ -113,93 +107,69 @@
 
             <!-- OPENING MESSAGE -->
 
-            <div class="d-flex justify-content-start mb-3">
+            <div class="ai-bubble">
 
-                <div class="ai-bubble">
+                Hello 👋
 
-                    Hello 👋
+                <br><br>
 
-                    <br><br>
+                I am your AI healthcare assistant.
 
-                    I am your AI healthcare assistant.
+                <br><br>
 
-                    <br><br>
-
-                    Describe your symptoms to begin consultation.
-
-                </div>
+                Describe your symptoms to begin consultation.
 
             </div>
 
             <!-- CHAT HISTORY -->
 
-            {% if current_user.is_authenticated %}
+            {% for case in user_cases %}
 
-                {% for case in current_user.cases %}
+                {% if case.status == "Pending" and case.chat_history %}
 
-                    {% if case.status == "Pending" and case.chat_history %}
+                    {% set parts = case.chat_history.split("||") %}
 
-                        {% set parts = case.chat_history.split("||") %}
+                    {% for part in parts %}
 
-                        {% for part in parts %}
+                        {% set cleaned = part.strip() %}
 
-                            {% set cleaned = part.strip() %}
+                        <!-- USER -->
 
-                            <!-- USER MESSAGE -->
+                        {% if cleaned.startswith("USER") %}
 
-                            {% if "USER" in cleaned %}
+                            {% set user_message =
+                                cleaned.replace("USER", "").strip() %}
 
-                                {% set user_message =
-                                    cleaned.replace("USER", "").strip() %}
+                            <div class="user-bubble">
 
-                                {% if user_message %}
+                                {{ user_message }}
 
-                                    <div class="d-flex justify-content-end mb-3">
+                            </div>
 
-                                        <div class="user-bubble">
+                        <!-- AI -->
 
-                                            {{ user_message }}
+                        {% elif cleaned.startswith("AI") %}
 
-                                        </div>
+                            {% set ai_message =
+                                cleaned.replace("AI", "").strip() %}
 
-                                    </div>
-
-                                {% endif %}
-
-                            <!-- AI MESSAGE -->
-
-                            {% elif "AI" in cleaned %}
-
-                                {% set ai_message =
-                                    cleaned.replace("AI", "").strip() %}
-
-                                {% if ai_message %}
-
-                                    <div class="d-flex justify-content-start mb-3">
-
-                                        <div class="ai-bubble">
+                            <div class="ai-bubble">
 
 <pre>{{ ai_message }}</pre>
 
-                                        </div>
+                            </div>
 
-                                    </div>
+                        {% endif %}
 
-                                {% endif %}
+                    {% endfor %}
 
-                            {% endif %}
+                {% endif %}
 
-                        {% endfor %}
-
-                    {% endif %}
-
-                {% endfor %}
-
-            {% endif %}
+            {% endfor %}
 
         </div>
 
-        <!-- INPUT AREA -->
+        <!-- INPUT -->
 
         <div class="input-area">
 
@@ -230,8 +200,6 @@
         </div>
 
     </div>
-
-    <!-- AUTO SCROLL -->
 
     <script>
 
