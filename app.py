@@ -78,6 +78,10 @@ app.config["SECRET_KEY"] = os.environ.get(
     "fallback_secret_key_2026"
 )
 
+serializer = URLSafeTimedSerializer(
+    str(app.config["SECRET_KEY"])
+)
+
 db.init_app(app)
 
 # LOGIN MANAGER
