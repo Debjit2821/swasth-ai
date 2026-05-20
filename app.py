@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, flash, render_template, request, redirect
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 from models import db, User, Case, Report, Appointment, Notification
@@ -246,9 +246,19 @@ def home():
         status="Pending"
     ).first()
 
+    # -----------------------------------
+    # POST REQUEST
+    # -----------------------------------
+
     if request.method == "POST":
 
         symptoms = request.form["symptoms"].strip()
+
+        # EMPTY MESSAGE
+
+        if not symptoms:
+
+            return redirect(url_for("home"))
 
         # -----------------------------------
         # SIMPLE NON-MEDICAL WORDS
@@ -257,6 +267,7 @@ def home():
         non_medical_keywords = [
             "hello",
             "hi",
+            "hey",
             "thanks",
             "thank you",
             "bye"
@@ -271,6 +282,7 @@ Please describe your medical symptoms so I can assist you.
             if active_case:
 
                 if not active_case.chat_history:
+
                     active_case.chat_history = ""
 
                 active_case.chat_history += f"""
@@ -301,7 +313,10 @@ Please describe your medical symptoms so I can assist you.
         current_stage = "collecting_symptoms"
 
         if active_case:
-            current_stage = active_case.conversation_stage
+
+            current_stage = (
+                active_case.conversation_stage
+            )
 
         # -----------------------------------
         # STAGE 1
@@ -314,8 +329,8 @@ Please describe your medical symptoms so I can assist you.
             if active_case and active_case.symptoms:
 
                 conversation_context = (
-                    active_case.symptoms +
-                    "\n" +
+                    active_case.symptoms
+                    + "\n" +
                     symptoms
                 )
 
@@ -354,13 +369,13 @@ Please describe your additional symptoms.
 Would you like an Online or Offline consultation?
 """
 
-            # USER DESCRIBES ADDITIONAL SYMPTOMS
+            # USER ADDS MORE SYMPTOMS
 
             else:
 
                 conversation_context = (
-                    active_case.symptoms +
-                    "\n" +
+                    active_case.symptoms
+                    + "\n" +
                     symptoms
                 )
 
@@ -412,7 +427,7 @@ Example:
 Please enter your preferred appointment time.
 
 Example:
-6:00 PM
+8:00 PM
 """
 
         # -----------------------------------
@@ -426,15 +441,19 @@ Example:
             specialist = "General Physician"
 
             if "Cardiologist" in active_case.ai_response:
+
                 specialist = "Cardiologist"
 
             elif "Dermatologist" in active_case.ai_response:
+
                 specialist = "Dermatologist"
 
             elif "Psychiatrist" in active_case.ai_response:
+
                 specialist = "Psychiatrist"
 
             elif "Neurologist" in active_case.ai_response:
+
                 specialist = "Neurologist"
 
             # FIND DOCTOR
@@ -467,20 +486,28 @@ Example:
             if not existing_appointment and doctor:
 
                 appointment = Appointment(
+
                     patient_id=current_user.id,
+
                     supervisor_id=doctor.id,
+
                     case_id=active_case.id,
+
                     appointment_date=(
                         active_case.appointment_selected_date
                     ),
+
                     appointment_time=appointment_time,
+
                     status="Scheduled"
                 )
 
                 db.session.add(appointment)
 
                 notification = Notification(
+
                     user_id=current_user.id,
+
                     message=f"""
 Appointment scheduled with
 Dr. {doctor.name}
@@ -520,7 +547,7 @@ Scheduled
             else:
 
                 result = """
-You already have an active scheduled appointment.
+You already have an active appointment.
 """
 
         # -----------------------------------
@@ -626,17 +653,31 @@ Please describe your current symptoms.
 
         if active_case:
 
-            if active_case.symptoms:
+            medical_stages = [
+                "collecting_symptoms",
+                "asking_more_symptoms",
+                "follow_up"
+            ]
 
-                active_case.symptoms += (
-                    f"\n{symptoms}"
-                )
+            # SAVE ONLY REAL MEDICAL SYMPTOMS
 
-            else:
+            if current_stage in medical_stages:
 
-                active_case.symptoms = symptoms
+                if active_case.symptoms:
+
+                    active_case.symptoms += (
+                        f"\n{symptoms}"
+                    )
+
+                else:
+
+                    active_case.symptoms = symptoms
+
+            # UPDATE RESPONSE
 
             active_case.ai_response = result
+
+            # UPDATE SUMMARY
 
             active_case.ai_summary = (
                 generate_case_summary(
@@ -646,8 +687,13 @@ Please describe your current symptoms.
 
             active_case.danger_level = danger_level
 
+            # INIT CHAT HISTORY
+
             if not active_case.chat_history:
+
                 active_case.chat_history = ""
+
+            # SAVE CHAT
 
             active_case.chat_history += f"""
 ||USER||
@@ -658,6 +704,8 @@ Please describe your current symptoms.
 {result}
 ||END||
 """
+
+            # MOVE STAGE
 
             if current_stage == "collecting_symptoms":
 
@@ -673,7 +721,13 @@ Please describe your current symptoms.
 
             active_case = Case(
 
-                symptoms=symptoms,
+                # SAVE ONLY REAL SYMPTOMS
+
+                symptoms=(
+                    symptoms
+                    if current_stage == "collecting_symptoms"
+                    else ""
+                ),
 
                 ai_response=result,
 
@@ -704,7 +758,9 @@ Please describe your current symptoms.
 
         db.session.commit()
 
-    # LOAD USER CASES
+    # -----------------------------------
+    # LOAD CASES
+    # -----------------------------------
 
     user_cases = Case.query.filter_by(
         user_id=current_user.id
