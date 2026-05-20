@@ -228,6 +228,9 @@ def book_appointment():
 # HOME CHATBOT
 @app.route("/home", methods=["GET", "POST"])
 @login_required
+# HOME CHATBOT
+@app.route("/home", methods=["GET", "POST"])
+@login_required
 def home():
 
     result = ""
@@ -259,6 +262,24 @@ def home():
             result = """
 Please describe your medical symptoms so I can assist you.
 """
+
+            active_case = Case.query.filter_by(
+                user_id=current_user.id,
+                status="Pending"
+            ).first()
+
+            if active_case:
+
+                active_case.chat_history += f"""
+###USER###
+{symptoms}
+
+###AI###
+{result}
+
+"""
+
+                db.session.commit()
 
             return render_template(
                 "index.html"
@@ -297,7 +318,10 @@ Please describe your medical symptoms so I can assist you.
                 conversation_context
             )
 
-            result += "\n\nDo you have any other symptoms? (yes/no)"
+            result += """
+
+Do you have any other symptoms? (yes/no)
+"""
 
         # -----------------------------------
         # STAGE 2 — MORE SYMPTOMS
@@ -323,7 +347,10 @@ Would you like an Online or Offline consultation?
                     conversation_context
                 )
 
-                result += "\n\nAny other symptoms? (yes/no)"
+                result += """
+
+Any other symptoms? (yes/no)
+"""
 
         # -----------------------------------
         # STAGE 3 — APPOINTMENT MODE
@@ -596,11 +623,15 @@ Please describe your current symptoms.
 
                 active_case.chat_history = ""
 
-            # CHAT STYLE STORAGE
+            # CHAT HISTORY
 
             active_case.chat_history += f"""
-USER:{symptoms}
-AI:{result}
+###USER###
+{symptoms}
+
+###AI###
+{result}
+
 """
 
             if current_stage == "collecting_symptoms":
@@ -623,8 +654,12 @@ AI:{result}
                 ),
 
                 chat_history=f"""
-USER:{symptoms}
-AI:{result}
+###USER###
+{symptoms}
+
+###AI###
+{result}
+
 """,
 
                 danger_level=danger_level,

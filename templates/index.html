@@ -100,7 +100,7 @@
 
         <div class="chat-box" id="chatBox">
 
-            <!-- DEFAULT MESSAGE -->
+            <!-- DEFAULT AI MESSAGE -->
 
             {% if current_user.cases|length == 0 %}
 
@@ -128,29 +128,35 @@
 
                     {% if case.status == "Pending" %}
 
-                        {% set messages = case.chat_history.split('\n') %}
+                        {% set chats = case.chat_history.split("###") %}
 
-                        {% for line in messages %}
+                        {% for part in chats %}
 
-                            {% if line.startswith("USER:") %}
+                            {% if part.startswith("USER") %}
 
                                 <div class="d-flex justify-content-end mb-3">
 
                                     <div class="user-bubble">
 
-                                        {{ line.replace("USER:", "") }}
+                                        {{ part.replace("USER", "") }}
 
                                     </div>
 
                                 </div>
 
-                            {% elif line.startswith("AI:") %}
+                            {% elif part.startswith("AI") %}
 
                                 <div class="d-flex justify-content-start mb-3">
 
                                     <div class="ai-bubble">
 
-                                        {{ line.replace("AI:", "") }}
+<pre style="white-space: pre-wrap;
+font-family: inherit;
+margin: 0;">
+
+{{ part.replace("AI", "") }}
+
+</pre>
 
                                     </div>
 
