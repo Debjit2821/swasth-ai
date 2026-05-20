@@ -228,9 +228,6 @@ def book_appointment():
 # HOME CHATBOT
 @app.route("/home", methods=["GET", "POST"])
 @login_required
-# HOME CHATBOT
-@app.route("/home", methods=["GET", "POST"])
-@login_required
 def home():
 
     result = ""
