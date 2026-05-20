@@ -16,7 +16,7 @@
 
         .chat-container {
 
-            max-width: 950px;
+            max-width: 1000px;
 
             margin: auto;
 
@@ -38,6 +38,24 @@
             box-shadow: 0px 4px 20px rgba(0,0,0,0.1);
         }
 
+        .user-wrapper {
+
+            display: flex;
+
+            justify-content: flex-end;
+
+            margin-bottom: 18px;
+        }
+
+        .ai-wrapper {
+
+            display: flex;
+
+            justify-content: flex-start;
+
+            margin-bottom: 18px;
+        }
+
         .user-bubble {
 
             background-color: #0d6efd;
@@ -48,17 +66,21 @@
 
             border-radius: 18px 18px 0px 18px;
 
-            max-width: 70%;
+            max-width: 75%;
 
-            margin-left: auto;
-
-            margin-bottom: 15px;
+            display: inline-block;
 
             word-wrap: break-word;
 
+            overflow-wrap: break-word;
+
+            word-break: break-word;
+
+            white-space: normal;
+
             font-size: 17px;
 
-            line-height: 1.5;
+            line-height: 1.7;
         }
 
         .ai-bubble {
@@ -71,17 +93,36 @@
 
             border-radius: 18px 18px 18px 0px;
 
-            max-width: 70%;
+            max-width: 75%;
 
-            margin-bottom: 15px;
+            display: inline-block;
 
             word-wrap: break-word;
 
+            overflow-wrap: break-word;
+
+            word-break: break-word;
+
+            white-space: normal;
+
             font-size: 17px;
 
-            line-height: 1.5;
+            line-height: 1.7;
 
             box-shadow: 0px 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .message-content {
+
+            width: 100%;
+
+            overflow-wrap: break-word;
+
+            word-break: break-word;
+
+            white-space: normal;
+
+            line-height: 1.7;
         }
 
         .input-area {
@@ -94,6 +135,18 @@
             resize: none;
 
             font-size: 16px;
+        }
+
+        .chat-box::-webkit-scrollbar {
+
+            width: 8px;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+
+            background: #c1c1c1;
+
+            border-radius: 10px;
         }
 
     </style>
@@ -139,19 +192,23 @@
         <div class="chat-box"
              id="chatBox">
 
-            <!-- WELCOME -->
+            <!-- OPENING MESSAGE -->
 
-            <div class="ai-bubble">
+            <div class="ai-wrapper">
 
-                Hello 👋
+                <div class="ai-bubble">
 
-                <br><br>
+                    Hello 👋
 
-                I am your AI healthcare assistant.
+                    <br><br>
 
-                <br><br>
+                    I am your AI healthcare assistant.
 
-                Describe your symptoms to begin consultation.
+                    <br><br>
+
+                    Describe your symptoms to begin consultation.
+
+                </div>
 
             </div>
 
@@ -161,32 +218,63 @@
 
                 {% if case.status == "Pending" and case.chat_history %}
 
-                    {% set formatted_chat = case.chat_history %}
+                    {% set messages = case.chat_history.split("||END||") %}
 
-                    {% set formatted_chat =
-                        formatted_chat.replace(
-                            '||USER||',
-                            '<div class="user-bubble">'
-                        )
-                    %}
+                    {% for message in messages %}
 
-                    {% set formatted_chat =
-                        formatted_chat.replace(
-                            '||AI||',
-                            '<div class="ai-bubble">'
-                        )
-                    %}
+                        {% set cleaned = message.strip() %}
 
-                    {% set formatted_chat =
-                        formatted_chat.replace(
-                            '\n\n',
-                            '</div>'
-                        )
-                    %}
+                        <!-- USER -->
 
-                    {{ formatted_chat
-                        | replace('\n', '<br>')
-                        | safe }}
+                        {% if "||USER||" in cleaned %}
+
+                            {% set user_message =
+                                cleaned.replace("||USER||", "").strip() %}
+
+                            {% if user_message %}
+
+                                <div class="user-wrapper">
+
+                                    <div class="user-bubble">
+
+                                        {{ user_message }}
+
+                                    </div>
+
+                                </div>
+
+                            {% endif %}
+
+                        <!-- AI -->
+
+                        {% elif "||AI||" in cleaned %}
+
+                            {% set ai_message =
+                                cleaned.replace("||AI||", "").strip() %}
+
+                            {% if ai_message %}
+
+                                <div class="ai-wrapper">
+
+                                    <div class="ai-bubble">
+
+                                        <div class="message-content">
+
+                                            {{ ai_message
+                                                | replace('\n', '<br>')
+                                                | safe }}
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            {% endif %}
+
+                        {% endif %}
+
+                    {% endfor %}
 
                 {% endif %}
 
