@@ -228,9 +228,6 @@ def book_appointment():
 # HOME CHATBOT
 @app.route("/home", methods=["GET", "POST"])
 @login_required
-# HOME CHATBOT
-@app.route("/home", methods=["GET", "POST"])
-@login_required
 def home():
 
     result = ""
@@ -637,7 +634,7 @@ You already have an active scheduled appointment.
         "index.html",
         user_cases=user_cases
     )
-#Supervisor APPOINTMENTS
+# SUPERVISOR APPOINTMENTS
 @app.route("/supervisor-appointments")
 @login_required
 def supervisor_appointments():
