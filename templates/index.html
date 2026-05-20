@@ -14,13 +14,13 @@
         }
 
         .chat-container {
-            max-width: 900px;
+            max-width: 950px;
             margin: auto;
             margin-top: 30px;
         }
 
         .chat-box {
-            height: 600px;
+            height: 650px;
             overflow-y: auto;
             background: #efeae2;
             border-radius: 20px;
@@ -29,6 +29,7 @@
         }
 
         .user-bubble {
+
             background-color: #0d6efd;
             color: white;
             padding: 12px 18px;
@@ -38,6 +39,7 @@
         }
 
         .ai-bubble {
+
             background-color: white;
             color: black;
             padding: 12px 18px;
@@ -57,7 +59,13 @@
 
         .chat-title {
             font-weight: bold;
-            font-size: 20px;
+            font-size: 22px;
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            font-family: inherit;
         }
 
     </style>
@@ -78,13 +86,15 @@
 
         <div>
 
-            <a href="/dashboard" class="btn btn-light me-2">
+            <a href="/dashboard"
+               class="btn btn-light me-2">
 
                 Dashboard
 
             </a>
 
-            <a href="/logout" class="btn btn-light">
+            <a href="/logout"
+               class="btn btn-light">
 
                 Logout
 
@@ -94,31 +104,32 @@
 
     </nav>
 
-    <!-- CHAT -->
+    <!-- CHAT CONTAINER -->
 
     <div class="chat-container">
 
-        <div class="chat-box" id="chatBox">
+        <div class="chat-box"
+             id="chatBox">
 
-            <!-- DEFAULT AI MESSAGE -->
+            <!-- OPENING MESSAGE -->
 
-            {% if current_user.cases|length == 0 %}
+            <div class="d-flex justify-content-start mb-3">
 
-                <div class="d-flex justify-content-start mb-3">
+                <div class="ai-bubble">
 
-                    <div class="ai-bubble">
+                    Hello 👋
 
-                        Hello 👋<br><br>
+                    <br><br>
 
-                        I am your AI healthcare assistant.<br><br>
+                    I am your AI healthcare assistant.
 
-                        Describe your symptoms to begin consultation.
+                    <br><br>
 
-                    </div>
+                    Describe your symptoms to begin consultation.
 
                 </div>
 
-            {% endif %}
+            </div>
 
             <!-- CHAT HISTORY -->
 
@@ -126,37 +137,37 @@
 
                 {% for case in current_user.cases %}
 
-                    {% if case.status == "Pending" %}
+                    {% if case.status == "Pending" and case.chat_history %}
 
-                        {% set chats = case.chat_history.split("###") %}
+                        {% set chats = case.chat_history.split('###') %}
 
                         {% for part in chats %}
 
-                            {% if part.startswith("USER") %}
+                            {% set cleaned = part.strip() %}
+
+                            <!-- USER MESSAGE -->
+
+                            {% if cleaned.startswith('USER') %}
 
                                 <div class="d-flex justify-content-end mb-3">
 
                                     <div class="user-bubble">
 
-                                        {{ part.replace("USER", "") }}
+                                        {{ cleaned.replace('USER', '') }}
 
                                     </div>
 
                                 </div>
 
-                            {% elif part.startswith("AI") %}
+                            <!-- AI MESSAGE -->
+
+                            {% elif cleaned.startswith('AI') %}
 
                                 <div class="d-flex justify-content-start mb-3">
 
                                     <div class="ai-bubble">
 
-<pre style="white-space: pre-wrap;
-font-family: inherit;
-margin: 0;">
-
-{{ part.replace("AI", "") }}
-
-</pre>
+<pre>{{ cleaned.replace('AI', '') }}</pre>
 
                                     </div>
 
@@ -174,11 +185,12 @@ margin: 0;">
 
         </div>
 
-        <!-- INPUT -->
+        <!-- INPUT AREA -->
 
         <div class="input-area">
 
-            <form method="POST" action="/home">
+            <form method="POST"
+                  action="/home">
 
                 <div class="input-group">
 
@@ -209,9 +221,11 @@ margin: 0;">
 
     <script>
 
-        const chatBox = document.getElementById("chatBox");
+        const chatBox =
+            document.getElementById("chatBox");
 
-        chatBox.scrollTop = chatBox.scrollHeight;
+        chatBox.scrollTop =
+            chatBox.scrollHeight;
 
     </script>
 
