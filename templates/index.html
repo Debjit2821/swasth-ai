@@ -139,39 +139,53 @@
 
                     {% if case.status == "Pending" and case.chat_history %}
 
-                        {% set chats = case.chat_history.split('###') %}
+                        {% set parts = case.chat_history.split("||") %}
 
-                        {% for part in chats %}
+                        {% for part in parts %}
 
                             {% set cleaned = part.strip() %}
 
                             <!-- USER MESSAGE -->
 
-                            {% if cleaned.startswith('USER') %}
+                            {% if "USER" in cleaned %}
 
-                                <div class="d-flex justify-content-end mb-3">
+                                {% set user_message =
+                                    cleaned.replace("USER", "").strip() %}
 
-                                    <div class="user-bubble">
+                                {% if user_message %}
 
-                                        {{ cleaned.replace('USER', '') }}
+                                    <div class="d-flex justify-content-end mb-3">
+
+                                        <div class="user-bubble">
+
+                                            {{ user_message }}
+
+                                        </div>
 
                                     </div>
 
-                                </div>
+                                {% endif %}
 
                             <!-- AI MESSAGE -->
 
-                            {% elif cleaned.startswith('AI') %}
+                            {% elif "AI" in cleaned %}
 
-                                <div class="d-flex justify-content-start mb-3">
+                                {% set ai_message =
+                                    cleaned.replace("AI", "").strip() %}
 
-                                    <div class="ai-bubble">
+                                {% if ai_message %}
 
-<pre>{{ cleaned.replace('AI', '') }}</pre>
+                                    <div class="d-flex justify-content-start mb-3">
+
+                                        <div class="ai-bubble">
+
+<pre>{{ ai_message }}</pre>
+
+                                        </div>
 
                                     </div>
 
-                                </div>
+                                {% endif %}
 
                             {% endif %}
 
