@@ -74,9 +74,45 @@ font-family: inherit;">
 
             </div>
 
+            <!-- FOLLOW-UP SECTION -->
+
+            <hr class="mt-5 mb-4">
+
+            <h4>
+
+                AI Recovery Follow-Up
+
+            </h4>
+
+            <p>
+
+                How are you feeling after following the treatment?
+
+            </p>
+
+            <form method="POST"
+                  action="/report-followup/{{ report.case_id }}">
+
+                <textarea
+                    name="followup"
+                    class="form-control"
+                    rows="4"
+                    placeholder="Describe your current condition..."
+                    required></textarea>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary mt-3">
+
+                    Analyze Recovery
+
+                </button>
+
+            </form>
+
             <a
                 href="/dashboard"
-                class="btn btn-primary mt-4">
+                class="btn btn-outline-dark mt-4">
 
                 Back to Dashboard
 

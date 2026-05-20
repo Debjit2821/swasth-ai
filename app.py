@@ -423,8 +423,6 @@ Example:
 
                 db.session.add(appointment)
 
-                # NOTIFICATION
-
                 notification = Notification(
                     user_id=current_user.id,
                     message=f"""
@@ -465,6 +463,63 @@ Scheduled
 
                 result = """
 You already have an active scheduled appointment.
+"""
+
+        # -----------------------------------
+        # FOLLOW-UP ANALYSIS
+        # -----------------------------------
+
+        elif current_stage == "follow_up":
+
+            previous_context = f"""
+Previous Symptoms:
+{active_case.symptoms}
+
+Doctor Report:
+{active_case.ai_summary}
+
+Current Patient Update:
+{symptoms}
+"""
+
+            result, specialist = analyze_symptoms(
+                previous_context
+            )
+
+            result += """
+
+Based on your current condition:
+
+1. Continue Consultation
+2. Close Consultation
+"""
+
+            active_case.conversation_stage = "follow_up_complete"
+
+        # -----------------------------------
+        # FOLLOW-UP COMPLETE
+        # -----------------------------------
+
+        elif current_stage == "follow_up_complete":
+
+            if "close" in symptoms.lower():
+
+                active_case.status = "Resolved"
+
+                result = """
+Consultation closed successfully.
+
+We wish you good health ❤️
+"""
+
+            else:
+
+                active_case.conversation_stage = "collecting_symptoms"
+
+                result = """
+Consultation reopened.
+
+Please describe your current symptoms.
 """
 
         # -----------------------------------
@@ -535,8 +590,6 @@ You already have an active scheduled appointment.
 
             active_case.danger_level = danger_level
 
-            # CHAT HISTORY
-
             if not active_case.chat_history:
 
                 active_case.chat_history = ""
@@ -550,8 +603,6 @@ AI:
 {result}
 
 """
-
-            # UPDATE STAGES
 
             if current_stage == "collecting_symptoms":
 
@@ -582,8 +633,6 @@ AI:
             )
 
             db.session.add(active_case)
-
-        # SAVE DATABASE
 
         db.session.commit()
 
@@ -638,6 +687,33 @@ def complete_appointment(appointment_id):
 
     appointment.status = "Completed"
 
+    # GET RELATED CASE
+
+    related_case = Case.query.get(
+        appointment.case_id
+    )
+
+    # START FOLLOW-UP FLOW
+
+    related_case.conversation_stage = "follow_up"
+
+    # NOTIFICATION
+
+    notification = Notification(
+        user_id=appointment.patient_id,
+        message="""
+Your doctor submitted a medical report.
+
+Please complete AI follow-up analysis
+before closing consultation.
+"""
+    )
+
+    db.session.add(notification)
+
+    db.session.commit()
+
+    return redirect("/supervisor-appointments")
     # NOTIFICATION
 
     notification = Notification(
@@ -825,6 +901,49 @@ def view_report(report_id):
     return render_template(
         "view_report.html",
         report=report
+    )
+# REPORT FOLLOW-UP
+@app.route("/report-followup/<int:case_id>", methods=["POST"])
+@login_required
+def report_followup(case_id):
+
+    case = Case.query.get(case_id)
+
+    current_update = request.form["followup"]
+
+    context = f"""
+Previous Symptoms:
+{case.symptoms}
+
+Doctor Summary:
+{case.ai_summary}
+
+Current Patient Condition:
+{current_update}
+"""
+
+    result, specialist = analyze_symptoms(
+        context
+    )
+
+    # SAVE FOLLOW-UP
+
+    case.chat_history += f"""
+
+FOLLOW-UP UPDATE:
+{current_update}
+
+AI FOLLOW-UP:
+{result}
+
+"""
+
+    db.session.commit()
+
+    return render_template(
+        "followup_result.html",
+        result=result,
+        case=case
     )
 
 # LOGOUT
