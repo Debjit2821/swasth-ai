@@ -1507,15 +1507,18 @@ def google_authorized():
 
     email = user_info["email"]
 
-    name = user_info["name"]
+    name = user_info.get(
+        "name",
+        "Google User"
+    )
 
-    # CHECK USER
+    # CHECK EXISTING USER
 
     user = User.query.filter_by(
         email=email
     ).first()
 
-    # CREATE ACCOUNT
+    # CREATE NEW USER
 
     if not user:
 
@@ -1525,11 +1528,15 @@ def google_authorized():
 
             email=email,
 
-            password="google-auth",
+            password=generate_password_hash(
+                "google-auth-user"
+            ),
 
             role="user",
 
-            approved=True
+            approved=True,
+
+            specialization=None
         )
 
         db.session.add(user)
@@ -1539,7 +1546,6 @@ def google_authorized():
     login_user(user)
 
     return redirect("/dashboard")
-
 if __name__ == "__main__":
 
     app.run(debug=True)
