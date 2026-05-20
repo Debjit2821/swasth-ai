@@ -9,11 +9,13 @@ from ai.symptom_analysis import (
     generate_case_summary
 )
 from ai.report_summary import summarize_report
+import os
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:deyken2821b@localhost:5432/swasthai'
-app.config['SECRET_KEY'] = 'secretkey'
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 
 db.init_app(app)
 
