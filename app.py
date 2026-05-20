@@ -228,6 +228,9 @@ def book_appointment():
 # HOME CHATBOT
 @app.route("/home", methods=["GET", "POST"])
 @login_required
+d# HOME CHATBOT
+@app.route("/home", methods=["GET", "POST"])
+@login_required
 def home():
 
     result = ""
@@ -275,10 +278,11 @@ Please describe your medical symptoms so I can assist you.
                 active_case.chat_history += f"""
 ||USER||
 {symptoms}
+||END||
 
 ||AI||
 {result}
-
+||END||
 """
 
                 db.session.commit()
@@ -332,11 +336,15 @@ Do you have any other symptoms? (yes/no)
 
         elif current_stage == "asking_more_symptoms":
 
+            # USER HAS MORE SYMPTOMS
+
             if symptoms.lower() == "yes":
 
                 result = """
 Please describe your additional symptoms.
 """
+
+            # USER HAS NO MORE SYMPTOMS
 
             elif symptoms.lower() == "no":
 
@@ -347,6 +355,8 @@ Please describe your additional symptoms.
                 result = """
 Would you like an Online or Offline consultation?
 """
+
+            # USER DESCRIBES ADDITIONAL SYMPTOMS
 
             else:
 
@@ -429,11 +439,15 @@ Example:
             elif "Neurologist" in active_case.ai_response:
                 specialist = "Neurologist"
 
+            # FIND DOCTOR
+
             doctor = User.query.filter_by(
                 role="supervisor",
                 specialization=specialist,
                 approved=True
             ).first()
+
+            # FALLBACK
 
             if not doctor:
 
@@ -442,6 +456,8 @@ Example:
                     specialization="General Physician",
                     approved=True
                 ).first()
+
+            # CHECK EXISTING APPOINTMENT
 
             existing_appointment = (
                 Appointment.query.filter_by(
@@ -510,7 +526,68 @@ You already have an active scheduled appointment.
 """
 
         # -----------------------------------
-        # DANGER LEVEL
+        # FOLLOW-UP
+        # -----------------------------------
+
+        elif current_stage == "follow_up":
+
+            previous_context = f"""
+Previous Symptoms:
+{active_case.symptoms}
+
+Doctor Report:
+{active_case.ai_summary}
+
+Current Patient Update:
+{symptoms}
+"""
+
+            result, specialist = analyze_symptoms(
+                previous_context
+            )
+
+            result += """
+
+Based on your current condition:
+
+1. Continue Consultation
+2. Close Consultation
+"""
+
+            active_case.conversation_stage = (
+                "follow_up_complete"
+            )
+
+        # -----------------------------------
+        # FOLLOW-UP COMPLETE
+        # -----------------------------------
+
+        elif current_stage == "follow_up_complete":
+
+            if "close" in symptoms.lower():
+
+                active_case.status = "Resolved"
+
+                result = """
+Consultation closed successfully.
+
+We wish you good health ❤️
+"""
+
+            else:
+
+                active_case.conversation_stage = (
+                    "collecting_symptoms"
+                )
+
+                result = """
+Consultation reopened.
+
+Please describe your current symptoms.
+"""
+
+        # -----------------------------------
+        # DANGER DETECTION
         # -----------------------------------
 
         high_keywords = [
@@ -533,6 +610,7 @@ You already have an active scheduled appointment.
         for word in high_keywords:
 
             if word in result.lower():
+
                 danger_level = "High"
 
         for word in medium_keywords:
@@ -541,6 +619,7 @@ You already have an active scheduled appointment.
                 word in result.lower()
                 and danger_level != "High"
             ):
+
                 danger_level = "Medium"
 
         # -----------------------------------
@@ -575,10 +654,11 @@ You already have an active scheduled appointment.
             active_case.chat_history += f"""
 ||USER||
 {symptoms}
+||END||
 
 ||AI||
 {result}
-
+||END||
 """
 
             if current_stage == "collecting_symptoms":
@@ -594,6 +674,7 @@ You already have an active scheduled appointment.
         else:
 
             active_case = Case(
+
                 symptoms=symptoms,
 
                 ai_response=result,
@@ -605,10 +686,11 @@ You already have an active scheduled appointment.
                 chat_history=f"""
 ||USER||
 {symptoms}
+||END||
 
 ||AI||
 {result}
-
+||END||
 """,
 
                 danger_level=danger_level,
@@ -624,7 +706,7 @@ You already have an active scheduled appointment.
 
         db.session.commit()
 
-    # IMPORTANT FIX
+    # LOAD USER CASES
 
     user_cases = Case.query.filter_by(
         user_id=current_user.id

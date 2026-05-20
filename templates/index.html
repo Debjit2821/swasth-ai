@@ -15,14 +15,18 @@
         }
 
         .chat-container {
+
             max-width: 950px;
+
             margin: auto;
+
             margin-top: 30px;
         }
 
         .chat-box {
 
             height: 650px;
+
             overflow-y: auto;
 
             background: #efeae2;
@@ -52,8 +56,6 @@
 
             word-wrap: break-word;
 
-            white-space: normal;
-
             font-size: 17px;
 
             line-height: 1.5;
@@ -75,8 +77,6 @@
 
             word-wrap: break-word;
 
-            white-space: normal;
-
             font-size: 17px;
 
             line-height: 1.5;
@@ -85,6 +85,7 @@
         }
 
         .input-area {
+
             margin-top: 20px;
         }
 
@@ -138,7 +139,7 @@
         <div class="chat-box"
              id="chatBox">
 
-            <!-- OPENING MESSAGE -->
+            <!-- WELCOME -->
 
             <div class="ai-bubble">
 
@@ -160,51 +161,32 @@
 
                 {% if case.status == "Pending" and case.chat_history %}
 
-                    {% set parts = case.chat_history.split("||") %}
+                    {% set formatted_chat = case.chat_history %}
 
-                    {% for part in parts %}
+                    {% set formatted_chat =
+                        formatted_chat.replace(
+                            '||USER||',
+                            '<div class="user-bubble">'
+                        )
+                    %}
 
-                        {% set cleaned = part.strip() %}
+                    {% set formatted_chat =
+                        formatted_chat.replace(
+                            '||AI||',
+                            '<div class="ai-bubble">'
+                        )
+                    %}
 
-                        <!-- USER MESSAGE -->
+                    {% set formatted_chat =
+                        formatted_chat.replace(
+                            '\n\n',
+                            '</div>'
+                        )
+                    %}
 
-                        {% if cleaned.startswith("USER") %}
-
-                            {% set user_message =
-                                cleaned.replace("USER", "").strip() %}
-
-                            {% if user_message %}
-
-                                <div class="user-bubble">
-
-                                    {{ user_message }}
-
-                                </div>
-
-                            {% endif %}
-
-                        <!-- AI MESSAGE -->
-
-                        {% elif cleaned.startswith("AI") %}
-
-                            {% set ai_message =
-                                cleaned.replace("AI", "").strip() %}
-
-                            {% if ai_message %}
-
-                                <div class="ai-bubble">
-
-                                    {{ ai_message
-                                        | replace('\n', '<br>')
-                                        | safe }}
-
-                                </div>
-
-                            {% endif %}
-
-                        {% endif %}
-
-                    {% endfor %}
+                    {{ formatted_chat
+                        | replace('\n', '<br>')
+                        | safe }}
 
                 {% endif %}
 
