@@ -10,41 +10,54 @@
     <style>
 
         body {
-            background-color: #f4f6f9;
+            background-color: #ece5dd;
         }
 
         .chat-container {
             max-width: 900px;
             margin: auto;
-            margin-top: 40px;
+            margin-top: 30px;
         }
 
         .chat-box {
-            height: 550px;
+            height: 600px;
             overflow-y: auto;
-            background: white;
+            background: #efeae2;
             border-radius: 20px;
-            padding: 20px;
+            padding: 25px;
             box-shadow: 0px 4px 20px rgba(0,0,0,0.1);
         }
 
-        .ai-message {
-            background-color: #e9ecef;
+        .user-bubble {
+            background-color: #0d6efd;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 18px 18px 0px 18px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .ai-bubble {
+            background-color: white;
             color: black;
-            padding: 15px 20px;
-            border-radius: 18px;
-            margin-bottom: 20px;
-            max-width: 90%;
+            padding: 12px 18px;
+            border-radius: 18px 18px 18px 0px;
+            max-width: 70%;
+            word-wrap: break-word;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.08);
         }
 
         .input-area {
             margin-top: 20px;
         }
 
-        pre {
-            white-space: pre-wrap;
-            font-family: inherit;
-            margin: 0;
+        textarea {
+            resize: none;
+        }
+
+        .chat-title {
+            font-weight: bold;
+            font-size: 20px;
         }
 
     </style>
@@ -57,7 +70,7 @@
 
     <nav class="navbar navbar-dark bg-primary px-4">
 
-        <span class="navbar-brand">
+        <span class="navbar-brand chat-title">
 
             SWASTH-AI Medical Assistant
 
@@ -81,11 +94,31 @@
 
     </nav>
 
-    <!-- CHAT AREA -->
+    <!-- CHAT -->
 
     <div class="chat-container">
 
-        <div class="chat-box">
+        <div class="chat-box" id="chatBox">
+
+            <!-- DEFAULT MESSAGE -->
+
+            {% if current_user.cases|length == 0 %}
+
+                <div class="d-flex justify-content-start mb-3">
+
+                    <div class="ai-bubble">
+
+                        Hello 👋<br><br>
+
+                        I am your AI healthcare assistant.<br><br>
+
+                        Describe your symptoms to begin consultation.
+
+                    </div>
+
+                </div>
+
+            {% endif %}
 
             <!-- CHAT HISTORY -->
 
@@ -95,15 +128,37 @@
 
                     {% if case.status == "Pending" %}
 
-                        <div class="ai-message">
+                        {% set messages = case.chat_history.split('\n') %}
 
-                            <pre>
+                        {% for line in messages %}
 
-{{ case.chat_history }}
+                            {% if line.startswith("USER:") %}
 
-                            </pre>
+                                <div class="d-flex justify-content-end mb-3">
 
-                        </div>
+                                    <div class="user-bubble">
+
+                                        {{ line.replace("USER:", "") }}
+
+                                    </div>
+
+                                </div>
+
+                            {% elif line.startswith("AI:") %}
+
+                                <div class="d-flex justify-content-start mb-3">
+
+                                    <div class="ai-bubble">
+
+                                        {{ line.replace("AI:", "") }}
+
+                                    </div>
+
+                                </div>
+
+                            {% endif %}
+
+                        {% endfor %}
 
                     {% endif %}
 
@@ -111,119 +166,9 @@
 
             {% endif %}
 
-            <!-- CURRENT RESPONSE -->
-
-            {% if result %}
-
-                <!-- APPOINTMENT CONFIRMATION -->
-
-                {% if "Appointment Confirmed" in result %}
-
-                    <div class="card shadow border-0 rounded-4 mt-4 mb-4">
-
-                        <div class="card-body">
-
-                            <h3 class="text-success">
-
-                                Appointment Confirmed ✅
-
-                            </h3>
-
-                            <pre>
-
-{{ result }}
-
-                            </pre>
-
-                            <!-- ACTION BUTTONS -->
-
-                            <div class="mt-4">
-
-                                <a
-                                    href="/dashboard"
-                                    class="btn btn-primary me-2">
-
-                                    Go to Dashboard
-
-                                </a>
-
-                                <a
-                                    href="/home"
-                                    class="btn btn-outline-primary">
-
-                                    Start New Consultation
-
-                                </a>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                <!-- EMERGENCY CARD -->
-
-                {% elif danger_level == "High" %}
-
-                    <div class="card border-danger shadow mt-4 mb-4">
-
-                        <div class="card-body">
-
-                            <h3 class="text-danger">
-
-                                🚨 Emergency Warning
-
-                            </h3>
-
-                            <pre>
-
-{{ result }}
-
-                            </pre>
-
-                        </div>
-
-                    </div>
-
-                <!-- NORMAL RESPONSE -->
-
-                {% else %}
-
-                    <div class="ai-message">
-
-                        <pre>
-
-{{ result }}
-
-                        </pre>
-
-                    </div>
-
-                {% endif %}
-
-            {% else %}
-
-                <!-- INITIAL MESSAGE -->
-
-                <div class="ai-message">
-
-                    Hello 👋
-
-                    <br><br>
-
-                    I am your AI healthcare assistant.
-
-                    <br><br>
-
-                    Describe your symptoms below to begin consultation.
-
-                </div>
-
-            {% endif %}
-
         </div>
 
-        <!-- INPUT AREA -->
+        <!-- INPUT -->
 
         <div class="input-area">
 
@@ -234,13 +179,13 @@
                     <textarea
                         name="symptoms"
                         class="form-control"
-                        rows="3"
-                        placeholder="Describe your symptoms..."
+                        rows="2"
+                        placeholder="Type your symptoms here..."
                         required></textarea>
 
                     <button
                         type="submit"
-                        class="btn btn-primary">
+                        class="btn btn-primary px-4">
 
                         Send
 
@@ -253,6 +198,16 @@
         </div>
 
     </div>
+
+    <!-- AUTO SCROLL -->
+
+    <script>
+
+        const chatBox = document.getElementById("chatBox");
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+    </script>
 
 </body>
 

@@ -256,10 +256,12 @@ def home():
 
         if symptoms.lower() in non_medical_keywords:
 
+            result = """
+Please describe your medical symptoms so I can assist you.
+"""
+
             return render_template(
-                "index.html",
-                result="Please describe your medical symptoms so I can assist you.",
-                danger_level=danger_level
+                "index.html"
             )
 
         # ACTIVE CASE
@@ -594,14 +596,11 @@ Please describe your current symptoms.
 
                 active_case.chat_history = ""
 
+            # CHAT STYLE STORAGE
+
             active_case.chat_history += f"""
-
-USER:
-{symptoms}
-
-AI:
-{result}
-
+USER:{symptoms}
+AI:{result}
 """
 
             if current_stage == "collecting_symptoms":
@@ -616,19 +615,22 @@ AI:
 
             active_case = Case(
                 symptoms=symptoms,
+
                 ai_response=result,
-                ai_summary=generate_case_summary(symptoms),
+
+                ai_summary=generate_case_summary(
+                    symptoms
+                ),
+
                 chat_history=f"""
-
-USER:
-{symptoms}
-
-AI:
-{result}
-
+USER:{symptoms}
+AI:{result}
 """,
+
                 danger_level=danger_level,
+
                 user_id=current_user.id,
+
                 conversation_stage="asking_more_symptoms"
             )
 
@@ -637,9 +639,7 @@ AI:
         db.session.commit()
 
     return render_template(
-        "index.html",
-        result=result,
-        danger_level=danger_level
+        "index.html"
     )
 # SUPERVISOR DASHBOARD
 @app.route("/supervisor")
