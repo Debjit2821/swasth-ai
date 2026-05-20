@@ -714,6 +714,27 @@ Please describe your current symptoms.
         "index.html",
         user_cases=user_cases
     )
+@app.route("/supervisor")
+@login_required
+def supervisor_dashboard():
+
+    if current_user.role != "supervisor":
+
+        flash("Access denied.")
+
+        return redirect(url_for("dashboard"))
+
+    appointments = Appointment.query.filter_by(
+        supervisor_id=current_user.id
+    ).all()
+
+    cases = Case.query.all()
+
+    return render_template(
+        "supervisor.html",
+        appointments=appointments,
+        cases=cases
+    )
 # SUPERVISOR APPOINTMENTS
 @app.route("/supervisor-appointments")
 @login_required
