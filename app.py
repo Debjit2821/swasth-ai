@@ -81,7 +81,6 @@ app.config["SECRET_KEY"] = os.environ.get(
 serializer = URLSafeTimedSerializer(
     str(app.config["SECRET_KEY"])
 )
-
 db.init_app(app)
 
 # LOGIN MANAGER
