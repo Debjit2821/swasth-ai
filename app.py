@@ -873,7 +873,7 @@ Please describe your current symptoms.
 
             else:
 
-            active_case = Case(
+                active_case = Case(
 
                 # SAVE ONLY REAL SYMPTOMS
 
