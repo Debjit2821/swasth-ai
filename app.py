@@ -1,4 +1,4 @@
-from flask import Flask, flash, render_template, request, redirect
+from flask import Flask, flash, render_template, request, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 from models import db, User, Case, Report, Appointment, Notification
@@ -75,12 +75,6 @@ def register():
                 url_for("register")
             )
 
-        # HASH PASSWORD
-
-        hashed_password = generate_password_hash(
-            password
-        )
-
         # CREATE USER
 
         new_user = User(
@@ -89,7 +83,7 @@ def register():
 
             email=email,
 
-            password=hashed_password,
+            password=password,
 
             role=role,
 
@@ -136,18 +130,34 @@ def login():
     if request.method == "POST":
 
         email = request.form["email"]
+
         password = request.form["password"]
 
         user = User.query.filter_by(
+
             email=email,
+
             password=password
+
         ).first()
 
         if user:
 
-            if not user.approved:
+            # SUPERVISOR APPROVAL
 
-                return "Account Pending Admin Approval"
+            if (
+                user.role == "supervisor"
+                and not user.approved
+            ):
+
+                flash(
+                    "Account Pending Admin Approval",
+                    "warning"
+                )
+
+                return redirect(
+                    url_for("login")
+                )
 
             login_user(user)
 
@@ -163,10 +173,18 @@ def login():
 
             return redirect("/dashboard")
 
-        return "Invalid Credentials"
+        flash(
+            "Invalid Credentials",
+            "danger"
+        )
 
-    return render_template("login.html")
+        return redirect(
+            url_for("login")
+        )
 
+    return render_template(
+        "login.html"
+    )
 
 # DASHBOARD
 # USER DASHBOARD
