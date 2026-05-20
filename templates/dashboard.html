@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>SWASTH-AI Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body class="bg-light">
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar navbar-dark bg-primary px-4">
+
+        <span class="navbar-brand">
+
+            SWASTH-AI Dashboard
+
+        </span>
+
+        <div>
+
+            <a href="/home" class="btn btn-light me-2">
+
+                AI Chat
+
+            </a>
+
+            <a href="/logout" class="btn btn-light">
+
+                Logout
+
+            </a>
+
+        </div>
+
+    </nav>
+
+    <div class="container mt-5">
+
+        <!-- NOTIFICATIONS -->
+
+        <h2 class="mb-4">
+
+            Notifications
+
+        </h2>
+
+        {% if notifications %}
+
+            {% for notification in notifications[::-1] %}
+
+                <div class="alert alert-warning shadow-sm">
+
+                    🔔 {{ notification.message }}
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="alert alert-light mb-5">
+
+                No notifications yet.
+
+            </div>
+
+        {% endif %}
+
+        <!-- APPOINTMENTS -->
+
+        <h2 class="mb-4">
+
+            Appointments
+
+        </h2>
+
+        {% if appointments %}
+
+            {% for appointment in appointments %}
+
+                <div class="card shadow border-0 rounded-4 mb-4">
+
+                    <div class="card-body">
+
+                        <h4>
+
+                            Consultation Appointment
+
+                        </h4>
+
+                        {% for doctor in supervisors %}
+
+                            {% if doctor.id == appointment.supervisor_id %}
+
+                                <p>
+
+                                    <strong>Doctor:</strong>
+
+                                    Dr. {{ doctor.name }}
+
+                                </p>
+
+                                <p>
+
+                                    <strong>Specialization:</strong>
+
+                                    {{ doctor.specialization }}
+
+                                </p>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                        <p>
+
+                            <strong>Date:</strong>
+
+                            {{ appointment.appointment_date }}
+
+                        </p>
+
+                        <p>
+
+                            <strong>Time:</strong>
+
+                            {{ appointment.appointment_time }}
+
+                        </p>
+
+                        <p>
+
+                            <strong>Status:</strong>
+
+                            {% if appointment.status == "Completed" %}
+
+                                <span class="badge bg-success">
+
+                                    Completed
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-primary">
+
+                                    {{ appointment.status }}
+
+                                </span>
+
+                            {% endif %}
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="alert alert-info mb-5">
+
+                No appointments scheduled.
+
+            </div>
+
+        {% endif %}
+
+        <!-- ACTIVE CONSULTATIONS -->
+
+        <h2 class="mb-4">
+
+            Active Consultations
+
+        </h2>
+
+        {% set active_found = false %}
+
+        {% for case in user_cases %}
+
+            {% if case.status == "Pending" %}
+
+                {% set active_found = true %}
+
+                <div class="card shadow border-0 rounded-4 mb-4">
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between">
+
+                            <h4>
+
+                                Consultation #{{ case.id }}
+
+                            </h4>
+
+                            {% if case.danger_level == "High" %}
+
+                                <span class="badge bg-danger">
+
+                                    HIGH RISK
+
+                                </span>
+
+                            {% elif case.danger_level == "Medium" %}
+
+                                <span class="badge bg-warning text-dark">
+
+                                    MEDIUM RISK
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-success">
+
+                                    LOW RISK
+
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                        <hr>
+
+                        <p>
+
+                            <strong>AI Summary:</strong>
+
+                        </p>
+
+                        <div class="alert alert-primary">
+
+                            {{ case.ai_summary }}
+
+                        </div>
+
+                        <p>
+
+                            <strong>Conversation Stage:</strong>
+
+                            {{ case.conversation_stage }}
+
+                        </p>
+
+                        <!-- BUTTONS -->
+
+                        <div class="mt-3">
+
+                            <a
+                                href="/home"
+                                class="btn btn-primary">
+
+                                Continue Consultation
+
+                            </a>
+
+                            <a
+                                href="/case-timeline/{{ case.id }}"
+                                class="btn btn-dark ms-2">
+
+                                View Timeline
+
+                            </a>
+
+                            <a
+                                href="/close-consultation/{{ case.id }}"
+                                class="btn btn-danger ms-2">
+
+                                Close Consultation
+
+                            </a>
+
+                        </div>
+
+                        <!-- REPORTS -->
+
+                        <div class="mt-4">
+
+                            <h5>
+
+                                Medical Reports
+
+                            </h5>
+
+                            {% for report in reports %}
+
+                                {% if report.case_id == case.id %}
+
+                                    <a
+                                        href="/view-report/{{ report.id }}"
+                                        class="btn btn-outline-success mt-2">
+
+                                        View Medical Report
+
+                                    </a>
+
+                                {% endif %}
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+        {% endfor %}
+
+        {% if not active_found %}
+
+            <div class="alert alert-info mb-5">
+
+                No active consultations.
+
+            </div>
+
+        {% endif %}
+
+        <!-- PREVIOUS CONSULTATIONS -->
+
+        <h2 class="mb-4">
+
+            Previous Consultations
+
+        </h2>
+
+        {% set previous_found = false %}
+
+        {% for case in user_cases %}
+
+            {% if case.status == "Resolved" %}
+
+                {% set previous_found = true %}
+
+                <div class="card shadow border-0 rounded-4 mb-4">
+
+                    <div class="card-body">
+
+                        <h4>
+
+                            Consultation #{{ case.id }}
+
+                        </h4>
+
+                        <p>
+
+                            <strong>Status:</strong>
+
+                            <span class="badge bg-success">
+
+                                Resolved
+
+                            </span>
+
+                        </p>
+
+                        <div class="alert alert-secondary">
+
+                            {{ case.ai_summary }}
+
+                        </div>
+
+                        <a
+                            href="/case-timeline/{{ case.id }}"
+                            class="btn btn-dark mt-2">
+
+                            View Timeline
+
+                        </a>
+
+                        <!-- REPORTS -->
+
+                        <div class="mt-3">
+
+                            {% for report in reports %}
+
+                                {% if report.case_id == case.id %}
+
+                                    <a
+                                        href="/view-report/{{ report.id }}"
+                                        class="btn btn-outline-success">
+
+                                        View Medical Report
+
+                                    </a>
+
+                                {% endif %}
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+        {% endfor %}
+
+        {% if not previous_found %}
+
+            <div class="alert alert-info">
+
+                No previous consultations found.
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</body>
+
+</html>

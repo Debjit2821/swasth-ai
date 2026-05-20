@@ -2,32 +2,257 @@
 <html>
 
 <head>
-    <title>SWASTH-AI</title>
+
+    <title>SWASTH-AI Chatbot</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+
+        body {
+            background-color: #f4f6f9;
+        }
+
+        .chat-container {
+            max-width: 900px;
+            margin: auto;
+            margin-top: 40px;
+        }
+
+        .chat-box {
+            height: 550px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0px 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .ai-message {
+            background-color: #e9ecef;
+            color: black;
+            padding: 15px 20px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+            max-width: 90%;
+        }
+
+        .input-area {
+            margin-top: 20px;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            font-family: inherit;
+            margin: 0;
+        }
+
+    </style>
+
 </head>
 
 <body>
 
-    <h1>AI Symptom Analysis</h1> 
+    <!-- NAVBAR -->
 
-    <form method="POST">
+    <nav class="navbar navbar-dark bg-primary px-4">
 
-        <textarea
-            name="symptoms"
-            placeholder="Enter symptoms"
-            rows="6"
-            cols="50"></textarea>
+        <span class="navbar-brand">
 
-        <br><br>
+            SWASTH-AI Medical Assistant
 
-        <button type="submit">
-            Analyze Symptoms
-        </button>
+        </span>
 
-    </form>
+        <div>
 
-    <br><br>
+            <a href="/dashboard" class="btn btn-light me-2">
 
-    <h2>{{ result }}</h2>
+                Dashboard
+
+            </a>
+
+            <a href="/logout" class="btn btn-light">
+
+                Logout
+
+            </a>
+
+        </div>
+
+    </nav>
+
+    <!-- CHAT AREA -->
+
+    <div class="chat-container">
+
+        <div class="chat-box">
+
+            <!-- CHAT HISTORY -->
+
+            {% if current_user.is_authenticated %}
+
+                {% for case in current_user.cases %}
+
+                    {% if case.status == "Pending" %}
+
+                        <div class="ai-message">
+
+                            <pre>
+
+{{ case.chat_history }}
+
+                            </pre>
+
+                        </div>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            {% endif %}
+
+            <!-- CURRENT RESPONSE -->
+
+            {% if result %}
+
+                <!-- APPOINTMENT CONFIRMATION -->
+
+                {% if "Appointment Confirmed" in result %}
+
+                    <div class="card shadow border-0 rounded-4 mt-4 mb-4">
+
+                        <div class="card-body">
+
+                            <h3 class="text-success">
+
+                                Appointment Confirmed ✅
+
+                            </h3>
+
+                            <pre>
+
+{{ result }}
+
+                            </pre>
+
+                            <!-- ACTION BUTTONS -->
+
+                            <div class="mt-4">
+
+                                <a
+                                    href="/dashboard"
+                                    class="btn btn-primary me-2">
+
+                                    Go to Dashboard
+
+                                </a>
+
+                                <a
+                                    href="/home"
+                                    class="btn btn-outline-primary">
+
+                                    Start New Consultation
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                <!-- EMERGENCY CARD -->
+
+                {% elif danger_level == "High" %}
+
+                    <div class="card border-danger shadow mt-4 mb-4">
+
+                        <div class="card-body">
+
+                            <h3 class="text-danger">
+
+                                🚨 Emergency Warning
+
+                            </h3>
+
+                            <pre>
+
+{{ result }}
+
+                            </pre>
+
+                        </div>
+
+                    </div>
+
+                <!-- NORMAL RESPONSE -->
+
+                {% else %}
+
+                    <div class="ai-message">
+
+                        <pre>
+
+{{ result }}
+
+                        </pre>
+
+                    </div>
+
+                {% endif %}
+
+            {% else %}
+
+                <!-- INITIAL MESSAGE -->
+
+                <div class="ai-message">
+
+                    Hello 👋
+
+                    <br><br>
+
+                    I am your AI healthcare assistant.
+
+                    <br><br>
+
+                    Describe your symptoms below to begin consultation.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+        <!-- INPUT AREA -->
+
+        <div class="input-area">
+
+            <form method="POST" action="/home">
+
+                <div class="input-group">
+
+                    <textarea
+                        name="symptoms"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Describe your symptoms..."
+                        required></textarea>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary">
+
+                        Send
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
 
 </body>
 
