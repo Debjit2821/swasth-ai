@@ -1,7 +1,11 @@
 from groq import Groq
+import os 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 client = Groq(
-    api_key="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"
+    api_key=os.environ.get("GROQ_API_KEY")
 )
 
 def summarize_report(report):
