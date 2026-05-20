@@ -41,7 +41,6 @@ def root():
     return redirect("/login")
 
 
-# REGISTER
 @app.route("/register", methods=["GET", "POST"])
 def register():
 
@@ -55,32 +54,81 @@ def register():
 
         role = request.form["role"]
 
-        specialization = request.form["specialization"]
+        specialization = request.form.get(
+            "specialization"
+        )
 
-        approved = False
+        # CHECK EXISTING EMAIL
 
-        # NORMAL USERS AUTO APPROVED
-        if role == "user":
+        existing_user = User.query.filter_by(
+            email=email
+        ).first()
 
-            approved = True
+        if existing_user:
+
+            flash(
+                "Email already registered.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("register")
+            )
+
+        # HASH PASSWORD
+
+        hashed_password = generate_password_hash(
+            password
+        )
+
+        # CREATE USER
 
         new_user = User(
+
             name=name,
+
             email=email,
-            password=password,
+
+            password=hashed_password,
+
             role=role,
-            approved=approved,
+
             specialization=specialization
         )
 
         db.session.add(new_user)
 
-        db.session.commit()
+        try:
 
-        return redirect("/login")
+            db.session.commit()
 
-    return render_template("register.html")
+            flash(
+                "Registration successful. Please login.",
+                "success"
+            )
 
+            return redirect(
+                url_for("login")
+            )
+
+        except Exception as e:
+
+            db.session.rollback()
+
+            print(e)
+
+            flash(
+                "Something went wrong during registration.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("register")
+            )
+
+    return render_template(
+        "register.html"
+    )
 # LOGIN
 @app.route("/login", methods=["GET", "POST"])
 def login():
