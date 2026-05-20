@@ -108,6 +108,15 @@ class Report(db.Model):
 # APPOINTMENT MODEL
 class Appointment(db.Model):
 
+    meeting_otp = db.Column(
+    db.String(10)
+)
+
+    otp_verified = db.Column(
+    db.Boolean,
+    default=False
+)
+
     case_id = db.Column(
     db.Integer,
     db.ForeignKey('case.id')

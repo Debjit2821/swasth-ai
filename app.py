@@ -1,17 +1,75 @@
 from flask import Flask, flash, render_template, request, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-
+from authlib.integrations.flask_client import OAuth
 from models import db, User, Case, Report, Appointment, Notification
+from flask_mail import (
+    Mail,
+    Message
+)
+
+from itsdangerous import (
+    URLSafeTimedSerializer
+)
 
 from ai.symptom_analysis import (
     analyze_symptoms,
     detect_specialist,
     generate_case_summary
 )
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash
+)
 from ai.report_summary import summarize_report
 import os
+import random
+def generate_otp():
+
+    return str(
+        random.randint(100000, 999999)
+    )
 
 app = Flask(__name__)
+oauth = OAuth(app)
+
+google = oauth.register(
+
+    name="google",
+
+    client_id=os.getenv(
+        "GOOGLE_CLIENT_ID"
+    ),
+
+    client_secret=os.getenv(
+        "GOOGLE_CLIENT_SECRET"
+    ),
+
+    server_metadata_url=
+    "https://accounts.google.com/.well-known/openid-configuration",
+
+    client_kwargs={
+        "scope": "openid email profile"
+    }
+)
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+
+app.config['MAIL_PORT'] = 587
+
+app.config['MAIL_USE_TLS'] = True
+
+app.config['MAIL_USERNAME'] = os.getenv(
+    "MAIL_USERNAME"
+)
+
+app.config['MAIL_PASSWORD'] = os.getenv(
+    "MAIL_PASSWORD"
+)
+
+mail = Mail(app)
+
+serializer = URLSafeTimedSerializer(
+    app.config["SECRET_KEY"]
+)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -83,7 +141,9 @@ def register():
 
             email=email,
 
-            password=password,
+            password=generate_password_hash(
+            password
+            ),
 
             role=role,
 
@@ -134,12 +194,13 @@ def login():
         password = request.form["password"]
 
         user = User.query.filter_by(
-
-            email=email,
-
-            password=password
-
-        ).first()
+        email=email
+    ).first()
+    
+    if user and check_password_hash(
+        user.password,
+        password
+    ):
 
         if user:
 
@@ -497,130 +558,157 @@ Example:
 """
 
         # -----------------------------------
-        # STAGE 5
-        # -----------------------------------
+# STAGE 5
+# -----------------------------------
 
-        elif current_stage == "appointment_time":
+    elif current_stage == "appointment_time":
 
-            appointment_time = symptoms
+        appointment_time = symptoms
 
-            specialist = "General Physician"
+        specialist = "General Physician"
 
-            if "Cardiologist" in active_case.ai_response:
+        if "Cardiologist" in active_case.ai_response:
 
-                specialist = "Cardiologist"
+            specialist = "Cardiologist"
 
-            elif "Dermatologist" in active_case.ai_response:
+        elif "Dermatologist" in active_case.ai_response:
 
-                specialist = "Dermatologist"
+            specialist = "Dermatologist"
 
-            elif "Psychiatrist" in active_case.ai_response:
+        elif "Psychiatrist" in active_case.ai_response:
 
-                specialist = "Psychiatrist"
+            specialist = "Psychiatrist"
 
-            elif "Neurologist" in active_case.ai_response:
+        elif "Neurologist" in active_case.ai_response:
 
-                specialist = "Neurologist"
+            specialist = "Neurologist"
 
-            # FIND DOCTOR
+        # FIND DOCTOR
+
+        doctor = User.query.filter_by(
+
+            role="supervisor",
+
+            specialization=specialist,
+
+            approved=True
+
+        ).first()
+
+        # FALLBACK
+
+        if not doctor:
 
             doctor = User.query.filter_by(
+
                 role="supervisor",
-                specialization=specialist,
+
+                specialization="General Physician",
+
                 approved=True
+
             ).first()
 
-            # FALLBACK
+        # CHECK EXISTING APPOINTMENT
 
-            if not doctor:
+        existing_appointment = (
+            Appointment.query.filter_by(
+                patient_id=current_user.id,
+                status="Scheduled"
+            ).first()
+        )
 
-                doctor = User.query.filter_by(
-                    role="supervisor",
-                    specialization="General Physician",
-                    approved=True
-                ).first()
+        if not existing_appointment and doctor:
 
-            # CHECK EXISTING APPOINTMENT
+            # GENERATE OTP
 
-            existing_appointment = (
-                Appointment.query.filter_by(
-                    patient_id=current_user.id,
-                    status="Scheduled"
-                ).first()
+            otp = generate_otp()
+
+            # CREATE APPOINTMENT
+
+            appointment = Appointment(
+
+                patient_id=current_user.id,
+
+                supervisor_id=doctor.id,
+
+                case_id=active_case.id,
+
+                appointment_date=(
+                    active_case.appointment_selected_date
+                ),
+
+                appointment_time=appointment_time,
+
+                meeting_otp=otp,
+
+                otp_verified=False,
+
+                status="Scheduled"
             )
 
-            if not existing_appointment and doctor:
+            db.session.add(appointment)
 
-                appointment = Appointment(
+            # NOTIFICATION
 
-                    patient_id=current_user.id,
+            notification = Notification(
 
-                    supervisor_id=doctor.id,
+                user_id=current_user.id,
 
-                    case_id=active_case.id,
+                message=f"""
+    Appointment scheduled with
+    Dr. {doctor.name}
+    on {active_case.appointment_selected_date}
+    at {appointment_time}.
+    """
+            )
 
-                    appointment_date=(
-                        active_case.appointment_selected_date
-                    ),
+            db.session.add(notification)
 
-                    appointment_time=appointment_time,
+            # RESULT MESSAGE
 
-                    status="Scheduled"
-                )
+            result = f"""
+    Appointment Confirmed ✅
 
-                db.session.add(appointment)
+    Doctor:
+    Dr. {doctor.name}
 
-                notification = Notification(
+    Specialization:
+    {doctor.specialization}
 
-                    user_id=current_user.id,
+    Mode:
+    {active_case.appointment_mode}
 
-                    message=f"""
-Appointment scheduled with
-Dr. {doctor.name}
-on {active_case.appointment_selected_date}
-at {appointment_time}.
-"""
-                )
+    Date:
+    {active_case.appointment_selected_date}
 
-                db.session.add(notification)
+    Time:
+    {appointment_time}
 
-                result = f"""
-Appointment Confirmed ✅
+    MEETING OTP:
+    {otp}
 
-Doctor:
-Dr. {doctor.name}
+    Please share this OTP with your doctor during consultation.
 
-Specialization:
-{doctor.specialization}
+    Status:
+    Scheduled
+    """
 
-Mode:
-{active_case.appointment_mode}
+            active_case.conversation_stage = (
+                "appointment_confirmed"
+            )
 
-Date:
-{active_case.appointment_selected_date}
+        else:
 
-Time:
-{appointment_time}
-
-Status:
-Scheduled
-"""
-
-                active_case.conversation_stage = (
-                    "appointment_confirmed"
-                )
-
-            else:
-
-                result = """
-You already have an active appointment.
+            result = """
+    You already have an active appointment.
 """
 
         # -----------------------------------
         # FOLLOW-UP
         # -----------------------------------
 
-        elif current_stage == "follow_up":
+    elif current_stage == "follow_up":
 
             previous_context = f"""
 Previous Symptoms:
@@ -653,7 +741,7 @@ Based on your current condition:
         # FOLLOW-UP COMPLETE
         # -----------------------------------
 
-        elif current_stage == "follow_up_complete":
+    elif current_stage == "follow_up_complete":
 
             if "close" in symptoms.lower():
 
@@ -681,7 +769,7 @@ Please describe your current symptoms.
         # DANGER DETECTION
         # -----------------------------------
 
-        high_keywords = [
+    high_keywords = [
             "heart attack",
             "stroke",
             "breathing difficulty",
@@ -690,7 +778,7 @@ Please describe your current symptoms.
             "unconscious"
         ]
 
-        medium_keywords = [
+    medium_keywords = [
             "fever",
             "infection",
             "vomiting",
@@ -698,13 +786,13 @@ Please describe your current symptoms.
             "dizziness"
         ]
 
-        for word in high_keywords:
+    for word in high_keywords:
 
             if word in result.lower():
 
                 danger_level = "High"
 
-        for word in medium_keywords:
+    for word in medium_keywords:
 
             if (
                 word in result.lower()
@@ -717,7 +805,7 @@ Please describe your current symptoms.
         # UPDATE EXISTING CASE
         # -----------------------------------
 
-        if active_case:
+    if active_case:
 
             medical_stages = [
                 "collecting_symptoms",
@@ -783,7 +871,7 @@ Please describe your current symptoms.
         # CREATE NEW CASE
         # -----------------------------------
 
-        else:
+            else:
 
             active_case = Case(
 
@@ -822,7 +910,7 @@ Please describe your current symptoms.
 
             db.session.add(active_case)
 
-        db.session.commit()
+            db.session.commit()
 
     # -----------------------------------
     # LOAD CASES
@@ -940,20 +1028,61 @@ def add_report(appointment_id):
         appointment_id
     )
 
+    # SECURITY CHECK
+
+    if current_user.role != "supervisor":
+
+        flash(
+            "Access Denied",
+            "danger"
+        )
+
+        return redirect(
+            url_for("dashboard")
+        )
+
+    # OTP VERIFICATION CHECK
+
+    if not appointment.otp_verified:
+
+        flash(
+            "Meeting OTP verification required.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "verify_appointment_otp",
+                appointment_id=appointment.id
+            )
+        )
+
+    # RELATED CASE
+
     related_case = Case.query.get(
         appointment.case_id
     )
 
     if request.method == "POST":
 
-        diagnosis = request.form["diagnosis"]
+        diagnosis = request.form[
+            "diagnosis"
+        ]
 
-        prescription = request.form["prescription"]
+        prescription = request.form[
+            "prescription"
+        ]
 
-        advice = request.form["advice"]
+        advice = request.form[
+            "advice"
+        ]
+
+        # CREATE REPORT
 
         report = Report(
+
             case_id=related_case.id,
+
             doctor_notes=f"""
 Diagnosis:
 {diagnosis}
@@ -961,25 +1090,45 @@ Diagnosis:
 Advice:
 {advice}
 """,
+
             medicine_schedule=prescription,
+
             ai_summary=related_case.ai_summary
         )
 
         db.session.add(report)
-        # REPORT NOTIFICATION
+
+        # NOTIFICATION
 
         notification = Notification(
+
             user_id=appointment.patient_id,
+
             message="""
-        Your doctor has added a new medical report.
-        """
+Your doctor has added a new medical report.
+"""
         )
 
         db.session.add(notification)
 
+        # START FOLLOW-UP FLOW
+
+        related_case.conversation_stage = (
+            "follow_up"
+        )
+
         db.session.commit()
 
-        return redirect("/supervisor-appointments")
+        flash(
+            "Report uploaded successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for(
+                "supervisor_dashboard"
+            )
+        )
 
     return render_template(
         "add_report.html",
@@ -1153,7 +1302,244 @@ def logout():
     logout_user()
 
     return redirect("/login")
+# VERIFY APPOINTMENT OTP
+@app.route(
+    "/verify-appointment-otp/<int:appointment_id>",
+    methods=["GET", "POST"]
+)
+@login_required
+def verify_appointment_otp(
+    appointment_id
+):
 
+    appointment = Appointment.query.get(
+        appointment_id
+    )
+
+    # ONLY SUPERVISOR
+
+    if current_user.role != "supervisor":
+
+        flash(
+            "Access Denied",
+            "danger"
+        )
+
+        return redirect(
+            url_for("dashboard")
+        )
+
+    if request.method == "POST":
+
+        entered_otp = request.form["otp"]
+
+        if entered_otp == appointment.meeting_otp:
+
+            appointment.otp_verified = True
+
+            db.session.commit()
+
+            flash(
+                "Meeting Verified Successfully",
+                "success"
+            )
+
+            return redirect(
+                url_for(
+                    "supervisor_dashboard"
+                )
+            )
+
+        else:
+
+            flash(
+                "Invalid OTP",
+                "danger"
+            )
+
+    return render_template(
+        "verify_otp.html",
+        appointment=appointment
+    )
+# FORGOT PASSWORD
+@app.route(
+    "/forgot-password",
+    methods=["GET", "POST"]
+)
+def forgot_password():
+
+    if request.method == "POST":
+
+        email = request.form["email"]
+
+        user = User.query.filter_by(
+            email=email
+        ).first()
+
+        if user:
+
+            token = serializer.dumps(
+                email,
+                salt="password-reset"
+            )
+
+            reset_link = url_for(
+                "reset_password",
+                token=token,
+                _external=True
+            )
+
+            msg = Message(
+
+                "SWASTH-AI Password Reset",
+
+                sender=app.config[
+                    'MAIL_USERNAME'
+                ],
+
+                recipients=[email]
+            )
+
+            msg.body = f"""
+Click the link below to reset your password:
+
+{reset_link}
+
+This link expires in 30 minutes.
+"""
+
+            mail.send(msg)
+
+            flash(
+                "Password reset email sent.",
+                "success"
+            )
+
+        else:
+
+            flash(
+                "Email not found.",
+                "danger"
+            )
+
+    return render_template(
+        "forgot_password.html"
+    )
+# RESET PASSWORD
+@app.route(
+    "/reset-password/<token>",
+    methods=["GET", "POST"]
+)
+def reset_password(token):
+
+    try:
+
+        email = serializer.loads(
+
+            token,
+
+            salt="password-reset",
+
+            max_age=1800
+        )
+
+    except Exception:
+
+        flash(
+            "Reset link expired or invalid.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("login")
+        )
+
+    user = User.query.filter_by(
+        email=email
+    ).first()
+
+    if request.method == "POST":
+
+        new_password = request.form[
+            "password"
+        ]
+
+        user.password = (
+            generate_password_hash(
+                new_password
+            )
+        )
+
+        db.session.commit()
+
+        flash(
+            "Password updated successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("login")
+        )
+
+    return render_template(
+        "reset_password.html"
+    )
+# GOOGLE LOGIN
+@app.route("/google-login")
+def google_login():
+
+    redirect_uri = url_for(
+        "google_authorized",
+        _external=True
+    )
+
+    return google.authorize_redirect(
+        redirect_uri
+    )
+# GOOGLE AUTHORIZED
+@app.route("/google-authorized")
+def google_authorized():
+
+    token = google.authorize_access_token()
+
+    user_info = token.get(
+        "userinfo"
+    )
+
+    email = user_info["email"]
+
+    name = user_info["name"]
+
+    # CHECK USER
+
+    user = User.query.filter_by(
+        email=email
+    ).first()
+
+    # CREATE ACCOUNT
+
+    if not user:
+
+        user = User(
+
+            name=name,
+
+            email=email,
+
+            password="google-auth",
+
+            role="patient",
+
+            approved=True
+        )
+
+        db.session.add(user)
+
+        db.session.commit()
+
+    login_user(user)
+
+    return redirect("/dashboard")
 
 if __name__ == "__main__":
 
