@@ -371,6 +371,15 @@ def home():
         user_id=current_user.id,
         status="Pending"
     ).first()
+    # DEFAULT STAGE
+
+    current_stage = "collecting_symptoms"
+    
+    if active_case and active_case.conversation_stage:
+    
+        current_stage = (
+            active_case.conversation_stage
+    )
 
     # -----------------------------------
     # POST REQUEST
