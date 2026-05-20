@@ -5,7 +5,8 @@
 
     <title>SWASTH-AI Chatbot</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
 
     <style>
 
@@ -20,35 +21,66 @@
         }
 
         .chat-box {
+
             height: 650px;
             overflow-y: auto;
+
             background: #efeae2;
+
             border-radius: 20px;
+
             padding: 25px;
+
             box-shadow: 0px 4px 20px rgba(0,0,0,0.1);
         }
 
         .user-bubble {
 
             background-color: #0d6efd;
+
             color: white;
-            padding: 12px 18px;
+
+            padding: 14px 18px;
+
             border-radius: 18px 18px 0px 18px;
+
             max-width: 70%;
+
             margin-left: auto;
+
             margin-bottom: 15px;
+
             word-wrap: break-word;
+
+            white-space: normal;
+
+            font-size: 17px;
+
+            line-height: 1.5;
         }
 
         .ai-bubble {
 
             background-color: white;
+
             color: black;
-            padding: 12px 18px;
+
+            padding: 14px 18px;
+
             border-radius: 18px 18px 18px 0px;
+
             max-width: 70%;
+
             margin-bottom: 15px;
+
             word-wrap: break-word;
+
+            white-space: normal;
+
+            font-size: 17px;
+
+            line-height: 1.5;
+
             box-shadow: 0px 2px 8px rgba(0,0,0,0.08);
         }
 
@@ -57,13 +89,10 @@
         }
 
         textarea {
-            resize: none;
-        }
 
-        pre {
-            margin: 0;
-            white-space: pre-wrap;
-            font-family: inherit;
+            resize: none;
+
+            font-size: 16px;
         }
 
     </style>
@@ -72,9 +101,11 @@
 
 <body>
 
+    <!-- NAVBAR -->
+
     <nav class="navbar navbar-dark bg-primary px-4">
 
-        <span class="navbar-brand">
+        <span class="navbar-brand fs-3 fw-bold">
 
             SWASTH-AI Medical Assistant
 
@@ -99,6 +130,8 @@
         </div>
 
     </nav>
+
+    <!-- CHAT -->
 
     <div class="chat-container">
 
@@ -133,31 +166,41 @@
 
                         {% set cleaned = part.strip() %}
 
-                        <!-- USER -->
+                        <!-- USER MESSAGE -->
 
                         {% if cleaned.startswith("USER") %}
 
                             {% set user_message =
                                 cleaned.replace("USER", "").strip() %}
 
-                            <div class="user-bubble">
+                            {% if user_message %}
 
-                                {{ user_message }}
+                                <div class="user-bubble">
 
-                            </div>
+                                    {{ user_message }}
 
-                        <!-- AI -->
+                                </div>
+
+                            {% endif %}
+
+                        <!-- AI MESSAGE -->
 
                         {% elif cleaned.startswith("AI") %}
 
                             {% set ai_message =
                                 cleaned.replace("AI", "").strip() %}
 
-                            <div class="ai-bubble">
+                            {% if ai_message %}
 
-<pre>{{ ai_message }}</pre>
+                                <div class="ai-bubble">
 
-                            </div>
+                                    {{ ai_message
+                                        | replace('\n', '<br>')
+                                        | safe }}
+
+                                </div>
+
+                            {% endif %}
 
                         {% endif %}
 
@@ -200,6 +243,8 @@
         </div>
 
     </div>
+
+    <!-- AUTO SCROLL -->
 
     <script>
 
