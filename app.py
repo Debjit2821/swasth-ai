@@ -238,19 +238,26 @@ def home():
 
     danger_level = "Low"
 
+    # ACTIVE CASE
+
+    active_case = Case.query.filter_by(
+        user_id=current_user.id,
+        status="Pending"
+    ).first()
+
     if request.method == "POST":
 
         symptoms = request.form["symptoms"].strip()
 
-        # NON-MEDICAL FILTER
+        # -----------------------------------
+        # SIMPLE NON-MEDICAL WORDS
+        # -----------------------------------
 
         non_medical_keywords = [
             "hello",
             "hi",
             "thanks",
             "thank you",
-            "okay",
-            "ok",
             "bye"
         ]
 
@@ -260,18 +267,16 @@ def home():
 Please describe your medical symptoms so I can assist you.
 """
 
-            active_case = Case.query.filter_by(
-                user_id=current_user.id,
-                status="Pending"
-            ).first()
-
             if active_case:
 
+                if not active_case.chat_history:
+                    active_case.chat_history = ""
+
                 active_case.chat_history += f"""
-###USER###
+||USER||
 {symptoms}
 
-###AI###
+||AI||
 {result}
 
 """
@@ -282,23 +287,17 @@ Please describe your medical symptoms so I can assist you.
                 "index.html"
             )
 
-        # ACTIVE CASE
-
-        active_case = Case.query.filter_by(
-            user_id=current_user.id,
-            status="Pending"
-        ).first()
-
+        # -----------------------------------
         # CURRENT STAGE
+        # -----------------------------------
 
         current_stage = "collecting_symptoms"
 
         if active_case:
-
             current_stage = active_case.conversation_stage
 
         # -----------------------------------
-        # STAGE 1 — COLLECT SYMPTOMS
+        # STAGE 1
         # -----------------------------------
 
         if current_stage == "collecting_symptoms":
@@ -308,7 +307,9 @@ Please describe your medical symptoms so I can assist you.
             if active_case and active_case.symptoms:
 
                 conversation_context = (
-                    active_case.symptoms + "\n" + symptoms
+                    active_case.symptoms +
+                    "\n" +
+                    symptoms
                 )
 
             result, specialist = analyze_symptoms(
@@ -321,23 +322,39 @@ Do you have any other symptoms? (yes/no)
 """
 
         # -----------------------------------
-        # STAGE 2 — MORE SYMPTOMS
+        # STAGE 2
         # -----------------------------------
 
         elif current_stage == "asking_more_symptoms":
 
-            if symptoms.lower() == "no":
+            # USER HAS MORE SYMPTOMS
 
-                active_case.conversation_stage = "appointment_mode"
+            if symptoms.lower() == "yes":
+
+                result = """
+Please describe your additional symptoms.
+"""
+
+            # USER HAS NO MORE SYMPTOMS
+
+            elif symptoms.lower() == "no":
+
+                active_case.conversation_stage = (
+                    "appointment_mode"
+                )
 
                 result = """
 Would you like an Online or Offline consultation?
 """
 
+            # USER DESCRIBES ADDITIONAL SYMPTOMS
+
             else:
 
                 conversation_context = (
-                    active_case.symptoms + "\n" + symptoms
+                    active_case.symptoms +
+                    "\n" +
+                    symptoms
                 )
 
                 result, specialist = analyze_symptoms(
@@ -346,18 +363,20 @@ Would you like an Online or Offline consultation?
 
                 result += """
 
-Any other symptoms? (yes/no)
+Do you have any other symptoms? (yes/no)
 """
 
         # -----------------------------------
-        # STAGE 3 — APPOINTMENT MODE
+        # STAGE 3
         # -----------------------------------
 
         elif current_stage == "appointment_mode":
 
             active_case.appointment_mode = symptoms
 
-            active_case.conversation_stage = "appointment_date"
+            active_case.conversation_stage = (
+                "appointment_date"
+            )
 
             result = """
 Great.
@@ -369,14 +388,18 @@ Example:
 """
 
         # -----------------------------------
-        # STAGE 4 — APPOINTMENT DATE
+        # STAGE 4
         # -----------------------------------
 
         elif current_stage == "appointment_date":
 
-            active_case.appointment_selected_date = symptoms
+            active_case.appointment_selected_date = (
+                symptoms
+            )
 
-            active_case.conversation_stage = "appointment_time"
+            active_case.conversation_stage = (
+                "appointment_time"
+            )
 
             result = """
 Please enter your preferred appointment time.
@@ -386,7 +409,7 @@ Example:
 """
 
         # -----------------------------------
-        # STAGE 5 — APPOINTMENT TIME
+        # STAGE 5
         # -----------------------------------
 
         elif current_stage == "appointment_time":
@@ -429,12 +452,14 @@ Example:
                     approved=True
                 ).first()
 
-            # CHECK DUPLICATE APPOINTMENT
+            # EXISTING APPOINTMENT
 
-            existing_appointment = Appointment.query.filter_by(
-                patient_id=current_user.id,
-                status="Scheduled"
-            ).first()
+            existing_appointment = (
+                Appointment.query.filter_by(
+                    patient_id=current_user.id,
+                    status="Scheduled"
+                ).first()
+            )
 
             if not existing_appointment and doctor:
 
@@ -442,7 +467,9 @@ Example:
                     patient_id=current_user.id,
                     supervisor_id=doctor.id,
                     case_id=active_case.id,
-                    appointment_date=active_case.appointment_selected_date,
+                    appointment_date=(
+                        active_case.appointment_selected_date
+                    ),
                     appointment_time=appointment_time,
                     status="Scheduled"
                 )
@@ -483,7 +510,9 @@ Status:
 Scheduled
 """
 
-                active_case.conversation_stage = "appointment_confirmed"
+                active_case.conversation_stage = (
+                    "appointment_confirmed"
+                )
 
             else:
 
@@ -492,7 +521,7 @@ You already have an active scheduled appointment.
 """
 
         # -----------------------------------
-        # FOLLOW-UP ANALYSIS
+        # FOLLOW UP
         # -----------------------------------
 
         elif current_stage == "follow_up":
@@ -520,10 +549,12 @@ Based on your current condition:
 2. Close Consultation
 """
 
-            active_case.conversation_stage = "follow_up_complete"
+            active_case.conversation_stage = (
+                "follow_up_complete"
+            )
 
         # -----------------------------------
-        # FOLLOW-UP COMPLETE
+        # FOLLOW UP COMPLETE
         # -----------------------------------
 
         elif current_stage == "follow_up_complete":
@@ -540,7 +571,9 @@ We wish you good health ❤️
 
             else:
 
-                active_case.conversation_stage = "collecting_symptoms"
+                active_case.conversation_stage = (
+                    "collecting_symptoms"
+                )
 
                 result = """
 Consultation reopened.
@@ -549,7 +582,7 @@ Please describe your current symptoms.
 """
 
         # -----------------------------------
-        # DANGER DETECTION
+        # DANGER LEVEL
         # -----------------------------------
 
         high_keywords = [
@@ -557,8 +590,8 @@ Please describe your current symptoms.
             "stroke",
             "breathing difficulty",
             "chest pain",
-            "unconscious",
-            "critical"
+            "critical",
+            "unconscious"
         ]
 
         medium_keywords = [
@@ -577,7 +610,10 @@ Please describe your current symptoms.
 
         for word in medium_keywords:
 
-            if word in result.lower() and danger_level != "High":
+            if (
+                word in result.lower()
+                and danger_level != "High"
+            ):
 
                 danger_level = "Medium"
 
@@ -602,7 +638,9 @@ Please describe your current symptoms.
 
                 if active_case.symptoms:
 
-                    active_case.symptoms += f"\n{symptoms}"
+                    active_case.symptoms += (
+                        f"\n{symptoms}"
+                    )
 
                 else:
 
@@ -610,8 +648,10 @@ Please describe your current symptoms.
 
             active_case.ai_response = result
 
-            active_case.ai_summary = generate_case_summary(
-                active_case.symptoms
+            active_case.ai_summary = (
+                generate_case_summary(
+                    active_case.symptoms
+                )
             )
 
             active_case.danger_level = danger_level
@@ -620,20 +660,20 @@ Please describe your current symptoms.
 
                 active_case.chat_history = ""
 
-            # CHAT HISTORY
-
             active_case.chat_history += f"""
-###USER###
+||USER||
 {symptoms}
 
-###AI###
+||AI||
 {result}
 
 """
 
             if current_stage == "collecting_symptoms":
 
-                active_case.conversation_stage = "asking_more_symptoms"
+                active_case.conversation_stage = (
+                    "asking_more_symptoms"
+                )
 
         # -----------------------------------
         # CREATE NEW CASE
@@ -651,10 +691,10 @@ Please describe your current symptoms.
                 ),
 
                 chat_history=f"""
-###USER###
+||USER||
 {symptoms}
 
-###AI###
+||AI||
 {result}
 
 """,
@@ -663,7 +703,9 @@ Please describe your current symptoms.
 
                 user_id=current_user.id,
 
-                conversation_stage="asking_more_symptoms"
+                conversation_stage=(
+                    "asking_more_symptoms"
+                )
             )
 
             db.session.add(active_case)
@@ -672,23 +714,6 @@ Please describe your current symptoms.
 
     return render_template(
         "index.html"
-    )
-# SUPERVISOR DASHBOARD
-@app.route("/supervisor")
-@login_required
-def supervisor():
-
-    if current_user.role != "supervisor":
-
-        return "Access Denied"
-
-    cases = Case.query.filter_by(
-        status="Pending"
-    ).all()
-
-    return render_template(
-        "supervisor.html",
-        cases=cases
     )
 # SUPERVISOR APPOINTMENTS
 @app.route("/supervisor-appointments")
