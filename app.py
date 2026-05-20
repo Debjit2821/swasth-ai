@@ -186,7 +186,6 @@ def register():
     return render_template(
         "register.html"
     )
-# LOGIN
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
@@ -197,15 +196,13 @@ def login():
         password = request.form["password"]
 
         user = User.query.filter_by(
-        email=email
-    ).first()
-    
-    if user and check_password_hash(
-        user.password,
-        password
-    ):
+            email=email
+        ).first()
 
-        if user:
+        if user and check_password_hash(
+            user.password,
+            password
+        ):
 
             # SUPERVISOR APPROVAL
 
@@ -249,7 +246,6 @@ def login():
     return render_template(
         "login.html"
     )
-
 # DASHBOARD
 # USER DASHBOARD
 @app.route("/dashboard")
@@ -1531,7 +1527,7 @@ def google_authorized():
 
             password="google-auth",
 
-            role="patient",
+            role="user",
 
             approved=True
         )
