@@ -1,306 +1,152 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
 
-    <meta charset="UTF-8">
+    <title>SWASTH-AI Chatbot</title>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>SWASTH-AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
 
     <style>
 
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
+        body {
+            background-color: #ece5dd;
         }
 
-        body{
+        .chat-container {
 
-            background:#0f172a;
+            max-width: 1000px;
 
-            font-family:Arial,sans-serif;
+            margin: auto;
 
-            color:white;
-
-            min-height:100vh;
+            margin-top: 30px;
         }
 
-        .navbar{
+        .chat-box {
 
-            width:100%;
+            height: 650px;
 
-            background:#111827;
+            overflow-y: auto;
 
-            padding:18px 30px;
+            background: #efeae2;
 
-            display:flex;
+            border-radius: 20px;
 
-            justify-content:space-between;
+            padding: 25px;
 
-            align-items:center;
-
-            border-bottom:1px solid #1e293b;
+            box-shadow: 0px 4px 20px rgba(0,0,0,0.1);
         }
 
-        .navbar h1{
+        .user-wrapper {
 
-            color:#22c55e;
+            display: flex;
 
-            font-size:28px;
+            justify-content: flex-end;
+
+            margin-bottom: 18px;
         }
 
-        .navbar a{
+        .ai-wrapper {
 
-            text-decoration:none;
+            display: flex;
 
-            color:white;
+            justify-content: flex-start;
 
-            background:#ef4444;
-
-            padding:10px 18px;
-
-            border-radius:10px;
+            margin-bottom: 18px;
         }
 
-        .main-container{
+        .user-bubble {
 
-            width:95%;
+            background-color: #0d6efd;
 
-            max-width:1200px;
+            color: white;
 
-            margin:auto;
+            padding: 14px 18px;
 
-            padding:30px 0;
+            border-radius: 18px 18px 0px 18px;
+
+            max-width: 75%;
+
+            display: inline-block;
+
+            word-wrap: break-word;
+
+            overflow-wrap: break-word;
+
+            word-break: break-word;
+
+            white-space: normal;
+
+            font-size: 17px;
+
+            line-height: 1.7;
         }
 
-        .top-grid{
+        .ai-bubble {
 
-            display:grid;
+            background-color: white;
 
-            grid-template-columns:2fr 1fr;
+            color: black;
 
-            gap:20px;
+            padding: 14px 18px;
+
+            border-radius: 18px 18px 18px 0px;
+
+            max-width: 75%;
+
+            display: inline-block;
+
+            word-wrap: break-word;
+
+            overflow-wrap: break-word;
+
+            word-break: break-word;
+
+            white-space: normal;
+
+            font-size: 17px;
+
+            line-height: 1.7;
+
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.08);
         }
 
-        .chat-section{
+        .message-content {
 
-            background:#111827;
+            width: 100%;
 
-            border-radius:16px;
+            overflow-wrap: break-word;
 
-            padding:20px;
+            word-break: break-word;
 
-            min-height:700px;
+            white-space: normal;
 
-            display:flex;
-
-            flex-direction:column;
+            line-height: 1.7;
         }
 
-        .chat-header{
+        .input-area {
 
-            margin-bottom:20px;
+            margin-top: 20px;
         }
 
-        .chat-header h2{
+        textarea {
 
-            color:#22c55e;
+            resize: none;
 
-            margin-bottom:8px;
+            font-size: 16px;
         }
 
-        .chat-box{
+        .chat-box::-webkit-scrollbar {
 
-            flex:1;
-
-            overflow-y:auto;
-
-            background:#0f172a;
-
-            border-radius:12px;
-
-            padding:20px;
-
-            border:1px solid #1e293b;
+            width: 8px;
         }
 
-        .user-message{
+        .chat-box::-webkit-scrollbar-thumb {
 
-            background:#2563eb;
+            background: #c1c1c1;
 
-            padding:14px;
-
-            border-radius:12px;
-
-            margin-bottom:15px;
-
-            white-space:pre-wrap;
-        }
-
-        .ai-message{
-
-            background:#1e293b;
-
-            padding:14px;
-
-            border-radius:12px;
-
-            margin-bottom:15px;
-
-            white-space:pre-wrap;
-        }
-
-        .history-box{
-
-            background:#111827;
-
-            padding:15px;
-
-            border-radius:12px;
-
-            margin-top:20px;
-
-            white-space:pre-wrap;
-
-            line-height:1.6;
-        }
-
-        .input-section{
-
-            margin-top:20px;
-        }
-
-        textarea{
-
-            width:100%;
-
-            height:120px;
-
-            background:#1e293b;
-
-            border:none;
-
-            border-radius:12px;
-
-            padding:16px;
-
-            color:white;
-
-            font-size:16px;
-
-            resize:none;
-
-            outline:none;
-        }
-
-        button{
-
-            margin-top:15px;
-
-            width:100%;
-
-            background:#22c55e;
-
-            border:none;
-
-            color:white;
-
-            padding:16px;
-
-            border-radius:12px;
-
-            font-size:18px;
-
-            cursor:pointer;
-
-            transition:0.3s;
-        }
-
-        button:hover{
-
-            background:#16a34a;
-        }
-
-        .sidebar{
-
-            display:flex;
-
-            flex-direction:column;
-
-            gap:20px;
-        }
-
-        .card{
-
-            background:#111827;
-
-            border-radius:16px;
-
-            padding:20px;
-        }
-
-        .card h3{
-
-            margin-bottom:15px;
-
-            color:#22c55e;
-        }
-
-        .case-card{
-
-            background:#1e293b;
-
-            padding:15px;
-
-            border-radius:12px;
-
-            margin-bottom:15px;
-        }
-
-        .case-card p{
-
-            margin-bottom:8px;
-
-            line-height:1.5;
-        }
-
-        .danger-low{
-
-            color:#22c55e;
-        }
-
-        .danger-medium{
-
-            color:#f59e0b;
-        }
-
-        .danger-high{
-
-            color:#ef4444;
-        }
-
-        .empty{
-
-            opacity:0.7;
-        }
-
-        @media(max-width:900px){
-
-            .top-grid{
-
-                grid-template-columns:1fr;
-            }
-
-            .chat-section{
-
-                min-height:auto;
-            }
+            border-radius: 10px;
         }
 
     </style>
@@ -309,263 +155,176 @@
 
 <body>
 
-    <div class="navbar">
+    <!-- NAVBAR -->
 
-        <h1>SWASTH-AI</h1>
+    <nav class="navbar navbar-dark bg-primary px-4">
 
-        <a href="/logout">
-            Logout
-        </a>
+        <span class="navbar-brand fs-3 fw-bold">
 
-    </div>
+            SWASTH-AI Medical Assistant
 
-    <div class="main-container">
+        </span>
 
-        <div class="top-grid">
+        <div>
 
-            <!-- CHAT SECTION -->
+            <a href="/dashboard"
+               class="btn btn-light me-2">
 
-            <div class="chat-section">
+                Dashboard
 
-                <div class="chat-header">
+            </a>
 
-                    <h2>
-                        AI Healthcare Assistant
-                    </h2>
+            <a href="/logout"
+               class="btn btn-light">
 
-                    <p>
-                        Describe your symptoms and get AI guidance.
-                    </p>
+                Logout
 
-                </div>
+            </a>
 
-                <div class="chat-box">
+        </div>
 
-                    {% if symptoms %}
+    </nav>
 
-                        <div class="user-message">
+    <!-- CHAT -->
 
-                            <strong>You:</strong>
-                            <br><br>
+    <div class="chat-container">
 
-                            {{ symptoms }}
+        <div class="chat-box"
+             id="chatBox">
 
-                        </div>
+            <!-- OPENING MESSAGE -->
 
-                    {% endif %}
+            <div class="ai-wrapper">
 
-                    {% if result %}
+                <div class="ai-bubble">
 
-                        <div class="ai-message">
+                    Hello 👋
 
-                            <strong>SWASTH-AI:</strong>
-                            <br><br>
+                    <br><br>
 
-                            {{ result }}
+                    I am your AI healthcare assistant.
 
-                        </div>
+                    <br><br>
 
-                    {% endif %}
-
-                    {% if active_case and active_case.chat_history %}
-
-                        <div class="history-box">
-
-                            <strong>
-                                Conversation History
-                            </strong>
-
-                            <br><br>
-
-                            {{ active_case.chat_history }}
-
-                        </div>
-
-                    {% endif %}
-
-                </div>
-
-                <div class="input-section">
-
-                    <form method="POST">
-
-                        <textarea
-                            name="symptoms"
-                            placeholder="Describe your symptoms here..."
-                            required
-                        ></textarea>
-
-                        <button type="submit">
-
-                            Send Message
-
-                        </button>
-
-                    </form>
+                    Describe your symptoms to begin consultation.
 
                 </div>
 
             </div>
 
-            <!-- SIDEBAR -->
+            <!-- CHAT HISTORY -->
 
-            <div class="sidebar">
+            {% for case in user_cases %}
 
-                <!-- ACTIVE CASE -->
+                {% if case.status == "Pending" and case.chat_history %}
 
-                <div class="card">
+                    {% set messages = case.chat_history.split("||END||") %}
 
-                    <h3>
-                        Active Case
-                    </h3>
+                    {% for message in messages %}
 
-                    {% if active_case %}
+                        {% set cleaned = message.strip() %}
 
-                        <div class="case-card">
+                        <!-- USER -->
 
-                            <p>
+                        {% if "||USER||" in cleaned %}
 
-                                <strong>
-                                    Danger Level:
-                                </strong>
+                            {% set user_message =
+                                cleaned.replace("||USER||", "").strip() %}
 
-                                {% if active_case.danger_level == "Low" %}
+                            {% if user_message %}
 
-                                    <span class="danger-low">
+                                <div class="user-wrapper">
 
-                                        {{ active_case.danger_level }}
+                                    <div class="user-bubble">
 
-                                    </span>
+                                        {{ user_message }}
 
-                                {% elif active_case.danger_level == "Medium" %}
+                                    </div>
 
-                                    <span class="danger-medium">
+                                </div>
 
-                                        {{ active_case.danger_level }}
+                            {% endif %}
 
-                                    </span>
+                        <!-- AI -->
 
-                                {% else %}
+                        {% elif "||AI||" in cleaned %}
 
-                                    <span class="danger-high">
+                            {% set ai_message =
+                                cleaned.replace("||AI||", "").strip() %}
 
-                                        {{ active_case.danger_level }}
+                            {% if ai_message %}
 
-                                    </span>
+                                <div class="ai-wrapper">
 
-                                {% endif %}
+                                    <div class="ai-bubble">
 
-                            </p>
+                                        <div class="message-content">
 
-                            <p>
+                                            {{ ai_message
+                                                | replace('\n', '<br>')
+                                                | safe }}
 
-                                <strong>
-                                    Status:
-                                </strong>
+                                        </div>
 
-                                {{ active_case.status }}
+                                    </div>
 
-                            </p>
+                                </div>
 
-                            <p>
+                            {% endif %}
 
-                                <strong>
-                                    Conversation Stage:
-                                </strong>
+                        {% endif %}
 
-                                {{ active_case.conversation_stage }}
+                    {% endfor %}
 
-                            </p>
+                {% endif %}
 
-                        </div>
+            {% endfor %}
 
-                    {% else %}
+        </div>
 
-                        <p class="empty">
+        <!-- INPUT -->
 
-                            No active case available.
+        <div class="input-area">
 
-                        </p>
+            <form method="POST"
+                  action="/home">
 
-                    {% endif %}
+                <div class="input-group">
+
+                    <textarea
+                        name="symptoms"
+                        class="form-control"
+                        rows="2"
+                        placeholder="Type your symptoms here..."
+                        required></textarea>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary px-4">
+
+                        Send
+
+                    </button>
 
                 </div>
 
-                <!-- RECENT CASES -->
-
-                <div class="card">
-
-                    <h3>
-                        Recent Cases
-                    </h3>
-
-                    {% if user_cases %}
-
-                        {% for case in user_cases %}
-
-                            <div class="case-card">
-
-                                <p>
-
-                                    <strong>
-                                        Symptoms:
-                                    </strong>
-
-                                    {{ case.symptoms[:120] }}
-
-                                </p>
-
-                                <p>
-
-                                    <strong>
-                                        AI Response:
-                                    </strong>
-
-                                    {{ case.ai_response[:150] }}
-
-                                </p>
-
-                                <p>
-
-                                    <strong>
-                                        Danger:
-                                    </strong>
-
-                                    {{ case.danger_level }}
-
-                                </p>
-
-                                <p>
-
-                                    <strong>
-                                        Status:
-                                    </strong>
-
-                                    {{ case.status }}
-
-                                </p>
-
-                            </div>
-
-                        {% endfor %}
-
-                    {% else %}
-
-                        <p class="empty">
-
-                            No previous cases found.
-
-                        </p>
-
-                    {% endif %}
-
-                </div>
-
-            </div>
+            </form>
 
         </div>
 
     </div>
+
+    <!-- AUTO SCROLL -->
+
+    <script>
+
+        const chatBox =
+            document.getElementById("chatBox");
+
+        chatBox.scrollTop =
+            chatBox.scrollHeight;
+
+    </script>
 
 </body>
 
