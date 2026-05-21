@@ -826,6 +826,17 @@ OTP:
                     "You already have "
                     "an active appointment."
                 )
+                # -----------------------------------
+# APPOINTMENT CONFIRMED
+# -----------------------------------
+
+        elif current_stage == "appointment_confirmed":
+
+            result = (
+                "Your appointment has already "
+                "been scheduled successfully. "
+                "Please wait for your consultation."
+            )
 
         # -----------------------------------
         # DANGER DETECTION
@@ -912,12 +923,13 @@ OTP:
                 active_case.chat_history = ""
 
             active_case.chat_history += f"""
-USER:
+||USER||
 {symptoms[:200]}
+||END||
 
-AI:
+||AI||
 {result[:300]}
-
+||END||
 """
 
             # LIMIT CHAT MEMORY
@@ -950,12 +962,16 @@ AI:
 
                 ai_summary="",
 
-                chat_history=(
+                chat_history=f"""
 
-                    f"User: {symptoms}\n"
+||USER||
+{symptoms}
+||END||
 
-                    f"AI: {result}\n"
-                ),
+||AI||
+{result}
+||END||
+""",
 
                 danger_level=danger_level,
 
