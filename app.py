@@ -888,20 +888,20 @@ OTP:
                 "asking_more_symptoms"
             ]
 
-        if (
-            symptoms
-            and current_stage in medical_stages
-        ):
+            if (
+                symptoms
+                and current_stage in medical_stages
+            ):
 
-            if active_case.symptoms:
+                if active_case.symptoms:
 
-                active_case.symptoms += (
+                    active_case.symptoms += (
                     f"\n{symptoms}"
                 )
 
-            else:
+                else:
 
-                active_case.symptoms = symptoms
+                    active_case.symptoms = symptoms
             # LIMIT SYMPTOMS SIZE
 
             if len(active_case.symptoms) > 1000:
