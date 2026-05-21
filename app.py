@@ -402,6 +402,25 @@ def home():
 
     current_stage = "collecting_symptoms"
 
+    # CREATE CASE IF NONE EXISTS
+
+    if not active_case:
+
+        active_case = Case(
+
+            user_id=current_user.id,
+
+            symptoms="",
+
+            status="Pending",
+
+            conversation_stage="collecting_symptoms"
+        )
+
+    db.session.add(active_case)
+
+    db.session.commit()
+
     if (
         active_case
         and active_case.conversation_stage
@@ -427,6 +446,17 @@ def home():
             )
 
         symptoms = symptoms[:300]
+        # =========================================
+    # SAVE USER MESSAGE
+    # =========================================
+
+        if not active_case.chat_history:
+        
+            active_case.chat_history = ""
+
+        active_case.chat_history += (
+            f"||USER|| {symptoms} ||END||"
+        )
 
       # -----------------------------------
         # INPUT GUARDRAILS
@@ -882,6 +912,18 @@ def home():
         .limit(10)
         .all()
     )
+    # =========================================
+# SAVE AI RESPONSE
+# =========================================
+
+    if result:
+        if not active_case.chat_history:
+
+            active_case.chat_history = ""
+        active_case.chat_history += (
+            f"||AI|| {result} ||END||"
+        )
+    db.session.commit()
     return render_template(
             
             "index.html",
