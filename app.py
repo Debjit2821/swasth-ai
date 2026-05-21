@@ -426,9 +426,9 @@ def home():
 
         symptoms = symptoms[:300]
 
-       # -----------------------------------
-# INPUT GUARDRAILS
-# -----------------------------------
+      # -----------------------------------
+        # INPUT GUARDRAILS
+        # -----------------------------------
 
         non_medical_keywords = [
         
@@ -444,7 +444,7 @@ def home():
             "ok",
             "okay"
         ]
-        
+
         medical_keywords = [
         
             "pain",
@@ -475,34 +475,75 @@ def home():
             "acne",
             "numbness"
         ]
-        
+
         # GREETING / NON MEDICAL CHAT
+
+        if (
         
-        if symptoms.lower() in non_medical_keywords:
-        
+            symptoms.lower() in non_medical_keywords
+
+            and current_stage not in [
+            
+                "asking_more_symptoms",
+                "appointment_mode",
+                "appointment_date",
+                "appointment_time"
+            ]
+        ):
+
             result = (
                 "Please describe your medical "
                 "symptoms only so I can assist "
                 "you properly."
             )
-        
+
         # INVALID / RANDOM INPUT
+
+        elif (
         
-        elif not any(
-            word in symptoms.lower()
-            for word in medical_keywords
+            current_stage in [
+            
+                "collecting_symptoms",
+                "asking_more_symptoms"
+            ]
+
+            and symptoms.lower() not in [
+            
+                "yes",
+                "no"
+            ]
+
+            and not any(
+                word in symptoms.lower()
+                for word in medical_keywords
+            )
         ):
-        
+
             result = (
                 "This does not appear to be "
                 "a valid medical symptom. "
                 "Please describe your "
                 "health issue clearly."
             )
-        
+
         # TOO SHORT
+
+        elif (
         
-        elif len(symptoms.split()) < 2:
+            current_stage in [
+            
+                "collecting_symptoms",
+                "asking_more_symptoms"
+            ]
+
+            and symptoms.lower() not in [
+            
+                "yes",
+                "no"
+            ]
+
+            and len(symptoms.split()) < 2
+        ):
 
             result = (
                 "Please provide more detailed "

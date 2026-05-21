@@ -9,6 +9,8 @@ client = Groq(
 )
 
 
+# DETECT SPECIALIST
+
 def detect_specialist(symptoms):
 
     symptoms = symptoms.lower()
@@ -69,7 +71,6 @@ def detect_specialist(symptoms):
         return "Neurologist"
 
     return "General Physician"
-
 # AI ANALYSIS
 
 def analyze_symptoms(symptoms):
