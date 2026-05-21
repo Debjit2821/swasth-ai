@@ -1,55 +1,363 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Login - SWASTH-AI</title>
+
+    <!-- BOOTSTRAP -->
 
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         rel="stylesheet">
 
+    <!-- FONT AWESOME -->
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <style>
 
-        body {
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, sans-serif;
+        }
 
-            background: linear-gradient(
-                to right,
-                #4facfe,
-                #00f2fe
+        body{
+
+            min-height:100vh;
+
+            display:flex;
+
+            justify-content:center;
+
+            align-items:center;
+
+            background:
+            linear-gradient(
+                135deg,
+                #0f172a,
+                #0ea5e9
             );
 
-            height: 100vh;
+            overflow:hidden;
 
-            display: flex;
-
-            justify-content: center;
-
-            align-items: center;
+            position:relative;
         }
 
-        .login-card {
+        /* BACKGROUND CIRCLES */
 
-            width: 420px;
+        .circle{
 
-            background: white;
+            position:absolute;
 
-            padding: 40px;
+            border-radius:50%;
 
-            border-radius: 20px;
-
-            box-shadow: 0px 5px 25px rgba(0,0,0,0.15);
+            background:rgba(255,255,255,0.08);
         }
 
-        .title {
+        .circle1{
 
-            text-align: center;
+            width:300px;
+            height:300px;
 
-            margin-bottom: 30px;
+            top:-120px;
+            left:-100px;
+        }
 
-            font-weight: bold;
+        .circle2{
 
-            color: #0d6efd;
+            width:350px;
+            height:350px;
+
+            bottom:-120px;
+            right:-100px;
+        }
+
+        /* LOGIN CARD */
+
+        .login-card{
+
+            width:450px;
+
+            background:rgba(255,255,255,0.08);
+
+            backdrop-filter:blur(18px);
+
+            border:1px solid rgba(255,255,255,0.15);
+
+            padding:40px;
+
+            border-radius:25px;
+
+            box-shadow:0 10px 35px rgba(0,0,0,0.3);
+
+            color:white;
+
+            z-index:10;
+        }
+
+        /* ICON */
+
+        .icon{
+
+            text-align:center;
+
+            font-size:60px;
+
+            margin-bottom:15px;
+
+            color:#38bdf8;
+        }
+
+        /* TITLE */
+
+        .title{
+
+            text-align:center;
+
+            margin-bottom:30px;
+        }
+
+        .title h1{
+
+            font-size:42px;
+
+            font-weight:bold;
+
+            margin-bottom:10px;
+        }
+
+        .title p{
+
+            color:#dbeafe;
+
+            font-size:17px;
+        }
+
+        /* INPUTS */
+
+        .input-box{
+
+            margin-bottom:22px;
+        }
+
+        .input-box label{
+
+            display:block;
+
+            margin-bottom:8px;
+
+            font-weight:600;
+        }
+
+        .input-box input{
+
+            width:100%;
+
+            padding:14px;
+
+            border-radius:12px;
+
+            border:1px solid rgba(255,255,255,0.1);
+
+            background:rgba(255,255,255,0.12);
+
+            outline:none;
+
+            color:white;
+
+            font-size:16px;
+
+            transition:0.3s;
+        }
+
+        .input-box input::placeholder{
+
+            color:#dbeafe;
+        }
+
+        .input-box input:focus{
+
+            border:1px solid #38bdf8;
+
+            box-shadow:0 0 10px rgba(56,189,248,0.5);
+        }
+
+        /* LOGIN BUTTON */
+
+        .login-btn{
+
+            width:100%;
+
+            padding:15px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:linear-gradient(
+                to right,
+                #38bdf8,
+                #0ea5e9
+            );
+
+            color:white;
+
+            font-size:18px;
+
+            font-weight:bold;
+
+            transition:0.3s;
+        }
+
+        .login-btn:hover{
+
+            transform:translateY(-4px);
+
+            background:linear-gradient(
+                to right,
+                #0ea5e9,
+                #0284c7
+            );
+        }
+
+        /* FORGOT PASSWORD */
+
+        .forgot{
+
+            text-align:right;
+
+            margin-top:12px;
+        }
+
+        .forgot a{
+
+            color:#93c5fd;
+
+            text-decoration:none;
+        }
+
+        .forgot a:hover{
+
+            text-decoration:underline;
+        }
+
+        /* DIVIDER */
+
+        .divider{
+
+            text-align:center;
+
+            margin:25px 0;
+
+            position:relative;
+        }
+
+        .divider::before{
+
+            content:"";
+
+            position:absolute;
+
+            width:100%;
+            height:1px;
+
+            background:rgba(255,255,255,0.2);
+
+            top:50%;
+            left:0;
+        }
+
+        .divider span{
+
+            background:#17618f;
+
+            padding:0 15px;
+
+            position:relative;
+
+            color:#dbeafe;
+        }
+
+        /* GOOGLE BUTTON */
+
+        .google-btn{
+
+            width:100%;
+
+            padding:14px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:white;
+
+            color:#0f172a;
+
+            font-weight:bold;
+
+            transition:0.3s;
+
+            text-decoration:none;
+
+            display:block;
+
+            text-align:center;
+        }
+
+        .google-btn:hover{
+
+            transform:translateY(-3px);
+
+            background:#dbeafe;
+        }
+
+        /* REGISTER */
+
+        .register-text{
+
+            text-align:center;
+
+            margin-top:25px;
+        }
+
+        .register-text a{
+
+            color:#93c5fd;
+
+            text-decoration:none;
+
+            font-weight:bold;
+        }
+
+        .register-text a:hover{
+
+            text-decoration:underline;
+        }
+
+        /* RESPONSIVE */
+
+        @media(max-width:500px){
+
+            .login-card{
+
+                width:95%;
+                padding:30px 20px;
+            }
+
+            .title h1{
+
+                font-size:34px;
+            }
         }
 
     </style>
@@ -58,45 +366,47 @@
 
 <body>
 
+    <!-- BACKGROUND -->
+
+    <div class="circle circle1"></div>
+
+    <div class="circle circle2"></div>
+
+    <!-- LOGIN CARD -->
+
     <div class="login-card">
 
-        <h2 class="title">
+        <!-- ICON -->
 
-            SWASTH-AI Login
+        <div class="icon">
 
-        </h2>
+            <i class="fa-solid fa-user-shield"></i>
 
-        <!-- FLASH MESSAGES -->
+        </div>
 
-        {% with messages =
-            get_flashed_messages(
-                with_categories=true
-            )
-        %}
+        <!-- TITLE -->
 
-            {% if messages %}
+        <div class="title">
 
-                {% for category, message in messages %}
+            <h1>SWASTH-AI</h1>
 
-                    <div class="alert alert-{{ category }}">
+            <p>
 
-                        {{ message }}
+                AI Powered Healthcare Login System
 
-                    </div>
+            </p>
 
-                {% endfor %}
-
-            {% endif %}
-
-        {% endwith %}
+        </div>
 
         <!-- LOGIN FORM -->
 
         <form method="POST">
 
-            <div class="mb-3">
+            <!-- EMAIL -->
 
-                <label class="form-label">
+            <div class="input-box">
+
+                <label>
 
                     Email
 
@@ -105,14 +415,16 @@
                 <input
                     type="email"
                     name="email"
-                    class="form-control"
+                    placeholder="Enter your email"
                     required>
 
             </div>
 
-            <div class="mb-3">
+            <!-- PASSWORD -->
 
-                <label class="form-label">
+            <div class="input-box">
+
+                <label>
 
                     Password
 
@@ -121,25 +433,26 @@
                 <input
                     type="password"
                     name="password"
-                    class="form-control"
+                    placeholder="Enter your password"
                     required>
 
             </div>
 
+            <!-- LOGIN BUTTON -->
+
             <button
                 type="submit"
-                class="btn btn-primary w-100">
+                class="login-btn">
 
-                Login
+                Login Now
 
             </button>
 
             <!-- FORGOT PASSWORD -->
 
-            <div class="text-end mt-2">
+            <div class="forgot">
 
-                <a href="/forgot-password"
-                   class="text-decoration-none">
+                <a href="forgot_password.html">
 
                     Forgot Password?
 
@@ -149,22 +462,36 @@
 
         </form>
 
-        <hr>
+        <!-- DIVIDER -->
+
+        <div class="divider">
+
+            <span>
+
+                OR
+
+            </span>
+
+        </div>
 
         <!-- GOOGLE LOGIN -->
 
-        <a href="/google-login"
-           class="btn btn-danger w-100">
+        <a href="#"
+           class="google-btn">
+
+            <i class="fa-brands fa-google"></i>
 
             Continue with Google
 
         </a>
 
-        <div class="text-center mt-3">
+        <!-- REGISTER -->
+
+        <div class="register-text">
 
             Don't have an account?
 
-            <a href="/register">
+            <a href="register.html">
 
                 Register
 
