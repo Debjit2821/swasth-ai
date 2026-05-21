@@ -417,9 +417,9 @@ def home():
             conversation_stage="collecting_symptoms"
         )
 
-    db.session.add(active_case)
+        db.session.add(active_case)
 
-    db.session.commit()
+        db.session.commit()
 
     if (
         active_case
@@ -456,6 +456,9 @@ def home():
 
         active_case.chat_history += (
             f"||USER|| {symptoms} ||END||"
+        )
+        active_case.symptoms += (
+            "\n" + symptoms
         )
 
       # -----------------------------------
@@ -609,6 +612,9 @@ def home():
                 "\n\nDo you have any "
                 "other symptoms? "
                 "(yes/no)"
+            )
+            active_case.conversation_stage = (
+                "asking_more_symptoms"
             )
 
         # STAGE 2
