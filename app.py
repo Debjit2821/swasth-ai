@@ -412,9 +412,17 @@ def home():
 
             symptoms="",
 
+            ai_response="",
+
+            ai_summary="",
+
+            danger_level="Low",
+
             status="Pending",
 
-            conversation_stage="collecting_symptoms"
+            conversation_stage="collecting_symptoms",
+
+            chat_history=""
         )
 
         db.session.add(active_case)
