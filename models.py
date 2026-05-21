@@ -22,6 +22,8 @@ class User(UserMixin, db.Model):
 
     role = db.Column(db.String(20), nullable=False)
 
+    phone_number = db.Column(db.String(20), nullable=False)
+
     approved = db.Column(db.Boolean, default=False)
 
     specialization = db.Column(db.String(100))

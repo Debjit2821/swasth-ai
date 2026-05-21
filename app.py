@@ -9,6 +9,8 @@ from flask_mail import (
     Message
 )
 
+from sms_service import send_sms
+
 from itsdangerous import (
     URLSafeTimedSerializer
 )
@@ -128,6 +130,8 @@ def register():
 
         role = request.form["role"]
 
+        phone_number = request.form["phone_number"]
+
         specialization = request.form.get(
             "specialization"
         )
@@ -157,9 +161,12 @@ def register():
 
             email=email,
 
+            phone_number=phone_number,
+
             password=generate_password_hash(
             password
             ),
+
 
             role=role,
 
@@ -517,6 +524,7 @@ def home():
             "itching",
             "acne",
             "numbness"
+            "dizzy"
         ]
 
         # GREETING / NON MEDICAL CHAT
@@ -884,6 +892,23 @@ def home():
 
                     db.session.add(
                         appointment
+                    )
+
+                    sms_text = f"""
+                    Appointment Confirmed ✅
+
+                    Doctor: Dr. {doctor.name}
+
+                    Date:
+                    {active_case.appointment_selected_date}
+
+                    Time:
+                    {appointment_time}
+                    """
+
+                    send_sms(
+                        current_user.phone_number,
+                        sms_text
                     )
 
                     # CREATE NOTIFICATION
@@ -1568,7 +1593,39 @@ def google_authorized():
 
     login_user(user)
 
-    return redirect("/dashboard")
+    return redirect("/complete-profile")
+@app.route(
+    "/complete-profile",
+    methods=["GET", "POST"]
+)
+@login_required
+def complete_profile():
+
+    if request.method == "POST":
+
+        current_user.name = request.form[
+            "name"
+        ]
+
+        current_user.phone_number = request.form[
+            "phone_number"
+        ]
+
+        current_user.role = request.form[
+            "role"
+        ]
+
+        current_user.specialization = (
+            request.form.get("specialization")
+        )
+
+        db.session.commit()
+
+        return redirect("/dashboard")
+
+    return render_template(
+        "complete_profile.html"
+    )
 if __name__ == "__main__":
 
     app.run(debug=True)
