@@ -584,21 +584,68 @@ Example:
 
             specialist = "General Physician"
 
-            if "Cardiologist" in active_case.ai_response:
-
+            symptom_text = (
+                active_case.symptoms.lower()
+            )
+            
+            # NEUROLOGY
+            
+            if any(word in symptom_text for word in [
+            
+                "nerve",
+                "brain",
+                "headache",
+                "migraine",
+                "seizure",
+                "memory loss",
+                "numbness",
+                "paralysis",
+                "stroke"
+            
+            ]):
+            
+                specialist = "Neurologist"
+            
+            # HEART
+            
+            elif any(word in symptom_text for word in [
+            
+                "heart",
+                "chest pain",
+                "blood pressure",
+                "palpitations"
+            
+            ]):
+            
                 specialist = "Cardiologist"
-
-            elif "Dermatologist" in active_case.ai_response:
-
+            
+            # SKIN
+            
+            elif any(word in symptom_text for word in [
+            
+                "skin",
+                "rash",
+                "acne",
+                "itching",
+                "allergy"
+            
+            ]):
+            
                 specialist = "Dermatologist"
-
-            elif "Psychiatrist" in active_case.ai_response:
+            
+            # MENTAL HEALTH
+            
+            elif any(word in symptom_text for word in [
+            
+                "anxiety",
+                "depression",
+                "stress",
+                "panic",
+                "mental"
+            
+            ]):
 
                 specialist = "Psychiatrist"
-
-            elif "Neurologist" in active_case.ai_response:
-
-                specialist = "Neurologist"
 
             # FIND DOCTOR
 
@@ -632,9 +679,12 @@ Example:
                 Appointment.query.filter_by(
                     patient_id=current_user.id,
                     status="Scheduled"
-                ).first()
+                )
+                .filter(
+                    Appointment.otp_verified == False
+                )
+                .first()
             )
-
             if not existing_appointment and doctor:
 
                 otp = generate_otp()
