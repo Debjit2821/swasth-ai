@@ -682,23 +682,23 @@ def home():
 
             # CHECK ACTIVE APPOINTMENT
 
-            existing_appointment = (
-
-                Appointment.query.filter_by(
-                    patient_id=current_user.id,
-                    status="Scheduled"
+                existing_appointment = (
+                
+                    Appointment.query.filter_by(
+                        patient_id=current_user.id
+                    )
+                    .filter(
+                    
+                        Appointment.status.in_(
+                        
+                            [
+                                "Scheduled",
+                                "Confirmed"
+                            ]
+                        )
+                    )
+                    .first()
                 )
-                .filter(
-                    Appointment.otp_verified == False
-                )
-                .first()
-            )
-
-            if (
-                not existing_appointment
-                and doctor
-            ):
-
                 otp = generate_otp()
 
                 # SEND EMAIL
@@ -913,9 +913,16 @@ OTP:
             # SAVE AI RESPONSE
 
             active_case.ai_response = result
-
+            
+            # LIVE SUMMARY UPDATE
+            
+            active_case.ai_summary = (
+                generate_case_summary(
+                    active_case.symptoms[-500:]
+                )
+            )
+            
             active_case.danger_level = danger_level
-
             # CHAT HISTORY
 
             if not active_case.chat_history:
