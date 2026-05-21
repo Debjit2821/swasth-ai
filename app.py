@@ -59,6 +59,8 @@ app.config['MAIL_PORT'] = 587
 
 app.config['MAIL_USE_TLS'] = True
 
+app.config['MAIL_TIMEOUT'] = 10
+
 app.config['MAIL_USERNAME'] = os.getenv(
     "MAIL_USERNAME"
 )
@@ -71,6 +73,14 @@ mail = Mail(app)
 
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+app.config[
+    "SQLALCHEMY_ENGINE_OPTIONS"
+] = {
+
+    "pool_pre_ping": True,
+
+    "pool_recycle": 300
+}
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = os.environ.get(
     "SECRET_KEY",
@@ -633,38 +643,38 @@ Example:
                 msg = Message(
                 
                     "SWASTH-AI Appointment OTP",
-                
+
                     sender=app.config[
                         "MAIL_USERNAME"
                     ],
-                
+
                     recipients=[current_user.email]
                 )
-                
+
                 msg.body = f"""
                 Hello {current_user.name},
-                
+
                 Your consultation OTP is:
-                
+
                 {otp}
-                
+
                 Please share this OTP with your doctor during consultation.
-                
+
                 Appointment Details:
-                
+
                 Doctor:
                 Dr. {doctor.name}
-                
+
                 Date:
                 {active_case.appointment_selected_date}
-                
+
                 Time:
                 {appointment_time}
-                
+
                 Thank you,
                 SWASTH-AI
                 """
-                
+
                 mail.send(msg)
 
                 appointment = Appointment(
@@ -1448,12 +1458,23 @@ Click the link below to reset your password:
 This link expires in 30 minutes.
 """
 
-            mail.send(msg)
+            try:
 
-            flash(
-                "Password reset email sent.",
-                "success"
-            )
+                mail.send(msg)
+
+                flash(
+                   "Password reset email sent.",
+                    "success"
+                    )
+
+            except Exception as e:
+
+                print(e)
+
+                flash(
+                    "Email sending failed.",
+                    "danger"
+    )
 
         else:
 
