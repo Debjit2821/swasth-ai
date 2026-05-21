@@ -7,22 +7,30 @@ load_dotenv()
 client = Groq(
    api_key=os.environ.get("GROQ_API_KEY")
 )
-# DETECT SPECIALIST
+
 
 def detect_specialist(symptoms):
 
     symptoms = symptoms.lower()
 
+    # CARDIOLOGY
+
     if any(word in symptoms for word in [
+
         "chest pain",
         "heart",
         "breathing",
-        "blood pressure"
+        "blood pressure",
+        "palpitations",
+        "shortness of breath"
     ]):
 
         return "Cardiologist"
 
+    # DERMATOLOGY
+
     elif any(word in symptoms for word in [
+
         "skin",
         "rash",
         "itching",
@@ -31,26 +39,36 @@ def detect_specialist(symptoms):
 
         return "Dermatologist"
 
+    # PSYCHIATRY
+
     elif any(word in symptoms for word in [
+
         "stress",
         "anxiety",
         "depression",
-        "mental"
+        "mental",
+        "panic"
     ]):
 
         return "Psychiatrist"
 
+    # NEUROLOGY
+
     elif any(word in symptoms for word in [
+
         "headache",
         "brain",
         "memory",
-        "seizure"
+        "seizure",
+        "migraine",
+        "stroke",
+        "numbness",
+        "nerve"
     ]):
 
         return "Neurologist"
 
     return "General Physician"
-
 
 # AI ANALYSIS
 

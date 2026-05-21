@@ -426,26 +426,88 @@ def home():
 
         symptoms = symptoms[:300]
 
-        # SIMPLE CHAT
+       # -----------------------------------
+# INPUT GUARDRAILS
+# -----------------------------------
 
         non_medical_keywords = [
-
+        
             "hello",
             "hi",
             "hey",
+            "bye",
+            "good morning",
+            "good night",
+            "how are you",
             "thanks",
             "thank you",
-            "bye"
+            "ok",
+            "okay"
         ]
-
+        
+        medical_keywords = [
+        
+            "pain",
+            "fever",
+            "headache",
+            "cough",
+            "cold",
+            "vomit",
+            "vomiting",
+            "heart",
+            "chest",
+            "stress",
+            "anxiety",
+            "rash",
+            "infection",
+            "dizziness",
+            "breathing",
+            "skin",
+            "nerve",
+            "weakness",
+            "migraine",
+            "pressure",
+            "burning",
+            "fatigue",
+            "seizure",
+            "stroke",
+            "itching",
+            "acne",
+            "numbness"
+        ]
+        
+        # GREETING / NON MEDICAL CHAT
+        
         if symptoms.lower() in non_medical_keywords:
+        
+            result = (
+                "Please describe your medical "
+                "symptoms only so I can assist "
+                "you properly."
+            )
+        
+        # INVALID / RANDOM INPUT
+        
+        elif not any(
+            word in symptoms.lower()
+            for word in medical_keywords
+        ):
+        
+            result = (
+                "This does not appear to be "
+                "a valid medical symptom. "
+                "Please describe your "
+                "health issue clearly."
+            )
+        
+        # TOO SHORT
+        
+        elif len(symptoms.split()) < 2:
 
             result = (
-                "Please describe your "
-                "medical symptoms so "
-                "I can assist you."
+                "Please provide more detailed "
+                "medical symptoms."
             )
-
         # STAGE 1
 
         elif current_stage == "collecting_symptoms":
