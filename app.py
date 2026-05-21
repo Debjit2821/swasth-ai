@@ -870,27 +870,27 @@ def home():
                     active_case.conversation_stage = (
                         "appointment_confirmed"
                     )
-    @app.route("/supervisor")
-    @login_required
-    def supervisor_dashboard():
+@app.route("/supervisor")
+@login_required
+def supervisor_dashboard():
 
-        if current_user.role != "supervisor":
+    if current_user.role != "supervisor":
 
-            flash("Access denied.")
+        flash("Access denied.")
 
-            return redirect(url_for("dashboard"))
+        return redirect(url_for("dashboard"))
 
-        appointments = Appointment.query.filter_by(
-            supervisor_id=current_user.id
-        ).all()
+    appointments = Appointment.query.filter_by(
+        supervisor_id=current_user.id
+    ).all()
 
-        cases = Case.query.all()
+    cases = Case.query.all()
 
-        return render_template(
-            "supervisor.html",
-            appointments=appointments,
-            cases=cases
-    )
+    return render_template(
+        "supervisor.html",
+        appointments=appointments,
+        cases=cases
+)
 # SUPERVISOR APPOINTMENTS
 @app.route("/supervisor-appointments")
 @login_required
