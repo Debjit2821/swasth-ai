@@ -870,16 +870,27 @@ OTP:
 
             # SAVE SYMPTOMS
 
-            if symptoms:
+            medical_stages = [
 
-                if active_case.symptoms:
+                "collecting_symptoms",
 
-                    active_case.symptoms += f"\n{symptoms}"
+                "asking_more_symptoms"
+            ]
 
-                else:
+        if (
+            symptoms
+            and current_stage in medical_stages
+        ):
 
-                    active_case.symptoms = symptoms
+            if active_case.symptoms:
 
+                active_case.symptoms += (
+                    f"\n{symptoms}"
+                )
+
+            else:
+
+                active_case.symptoms = symptoms
             # LIMIT SYMPTOMS SIZE
 
             if len(active_case.symptoms) > 1000:
