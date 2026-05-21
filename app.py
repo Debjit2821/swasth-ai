@@ -25,11 +25,7 @@ from werkzeug.security import (
 from ai.report_summary import summarize_report
 import os
 import random
-def generate_otp():
 
-    return str(
-        random.randint(100000, 999999)
-    )
 
 app = Flask(__name__)
 oauth = OAuth(app)
@@ -380,6 +376,8 @@ def book_appointment():
 
 
 # HOME CHATBOT
+```python
+# HOME CHATBOT
 @app.route("/home", methods=["GET", "POST"])
 @login_required
 def home():
@@ -400,8 +398,6 @@ def home():
         .first()
     )
 
-    # DEFAULT STAGE
-
     current_stage = "collecting_symptoms"
 
     if (
@@ -413,9 +409,7 @@ def home():
             active_case.conversation_stage
         )
 
-    # -----------------------------------
     # POST REQUEST
-    # -----------------------------------
 
     if request.method == "POST":
 
@@ -430,13 +424,9 @@ def home():
                 url_for("home")
             )
 
-        # LIMIT USER INPUT
-
         symptoms = symptoms[:300]
 
-        # -----------------------------------
         # SIMPLE CHAT
-        # -----------------------------------
 
         non_medical_keywords = [
 
@@ -456,9 +446,7 @@ def home():
                 "I can assist you."
             )
 
-        # -----------------------------------
         # STAGE 1
-        # -----------------------------------
 
         elif current_stage == "collecting_symptoms":
 
@@ -488,9 +476,7 @@ def home():
                 "(yes/no)"
             )
 
-        # -----------------------------------
         # STAGE 2
-        # -----------------------------------
 
         elif current_stage == "asking_more_symptoms":
 
@@ -534,9 +520,7 @@ def home():
                     "(yes/no)"
                 )
 
-        # -----------------------------------
         # STAGE 3
-        # -----------------------------------
 
         elif current_stage == "appointment_mode":
 
@@ -554,9 +538,7 @@ def home():
                 "Example:\n25 May 2026"
             )
 
-        # -----------------------------------
         # STAGE 4
-        # -----------------------------------
 
         elif current_stage == "appointment_date":
 
@@ -574,87 +556,17 @@ def home():
                 "Example:\n8:00 PM"
             )
 
-        # -----------------------------------
         # STAGE 5
-        # -----------------------------------
 
         elif current_stage == "appointment_time":
 
             appointment_time = symptoms
 
             specialist = (
-                "General Physician"
+                detect_specialist(
+                    active_case.symptoms
+                )
             )
-
-            symptom_text = (
-                active_case.symptoms.lower()
-            )
-
-            # NEUROLOGY
-
-            if any(
-                word in symptom_text
-                for word in [
-
-                    "nerve",
-                    "brain",
-                    "headache",
-                    "migraine",
-                    "seizure",
-                    "memory",
-                    "numbness",
-                    "stroke"
-                ]
-            ):
-
-                specialist = "Neurologist"
-
-            # HEART
-
-            elif any(
-                word in symptom_text
-                for word in [
-
-                    "heart",
-                    "chest pain",
-                    "palpitations",
-                    "blood pressure"
-                ]
-            ):
-
-                specialist = "Cardiologist"
-
-            # SKIN
-
-            elif any(
-                word in symptom_text
-                for word in [
-
-                    "skin",
-                    "rash",
-                    "acne",
-                    "itching"
-                ]
-            ):
-
-                specialist = "Dermatologist"
-
-            # MENTAL
-
-            elif any(
-                word in symptom_text
-                for word in [
-
-                    "anxiety",
-                    "stress",
-                    "panic",
-                    "depression"
-                ]
-            ):
-
-                specialist = "Psychiatrist"
-
-            # FIND DOCTOR
 
             doctor = (
                 User.query.filter_by(
@@ -665,149 +577,62 @@ def home():
                 .first()
             )
 
-            # FALLBACK
-
             if not doctor:
-            
+
                 doctor = (
                     User.query.filter_by(
                         role="supervisor",
-                        specialization=(
-                            "General Physician"
-                        ),
                         approved=True
                     )
                     .first()
                 )
-            
-            # CHECK ACTIVE APPOINTMENT
-            
-            existing_appointment = (
-            
-                Appointment.query.filter_by(
-                    patient_id=current_user.id
-                )
-                .filter(
-                
-                    Appointment.status.in_(
-                    
-                        [
-                            "Scheduled",
-                            "Confirmed"
-                        ]
-                    )
-                )
-                .first()
+
+            appointment = Appointment(
+
+                patient_id=current_user.id,
+
+                supervisor_id=doctor.id,
+
+                case_id=active_case.id,
+
+                appointment_date=(
+                    active_case
+                    .appointment_selected_date
+                ),
+
+                appointment_time=(
+                    appointment_time
+                ),
+
+                status="Scheduled"
             )
-            
-            # DEVELOPMENT MODE
-            # IGNORE OLD APPOINTMENTS
-            
-            existing_appointment = None
-            
-            if (
-                not existing_appointment
-                and doctor
-            ):
-            
-                otp = generate_otp()
-            
-                # SEND EMAIL
-            
-                try:
-                
-                    msg = Message(
-                    
-                        "SWASTH-AI Appointment OTP",
-            
-                        sender=app.config[
-                            "MAIL_USERNAME"
-                        ],
-            
-                        recipients=[
-                            current_user.email
-                        ]
-                    )
-            
-                    msg.body = f"""
-            Hello {current_user.name},
-            
-            Your consultation OTP is:
-            
-            {otp}
-            
-            Doctor:
-            Dr. {doctor.name}
-            
-            Date:
-            {active_case.appointment_selected_date}
-            
-            Time:
-            {appointment_time}
-            
-            Thank you,
-            SWASTH-AI
-            """
-            
-                    mail.send(msg)
-            
-                except Exception as e:
-                
-                    print(e)
-            
-                # CREATE APPOINTMENT
-            
-                appointment = Appointment(
-                
-                    patient_id=current_user.id,
-            
-                    supervisor_id=doctor.id,
-            
-                    case_id=active_case.id,
-            
-                    appointment_date=(
-                        active_case
-                        .appointment_selected_date
-                    ),
-            
-                    appointment_time=(
-                        appointment_time
-                    ),
-            
-                    meeting_otp=otp,
-            
-                    otp_verified=False,
-            
-                    status="Scheduled"
-                )
-            
-                db.session.add(
-                    appointment
-                )
-            
-                notification = Notification(
-                
-                    user_id=current_user.id,
-            
-                    message=(
-                        f"Appointment with "
-                        f"Dr. {doctor.name} "
-                        f"scheduled."
-                    )
-                )
-            
-                db.session.add(
-                    notification
-                )
-                # GENERATE SUMMARY ONLY HERE
 
-                active_case.ai_summary = (
-                    generate_case_summary(
-                        active_case.symptoms[-500:]
-                    )
-                )
+            db.session.add(
+                appointment
+            )
 
-                result = f"""
+            notification = Notification(
+
+                user_id=current_user.id,
+
+                message=(
+                    f"Appointment with "
+                    f"Dr. {doctor.name} "
+                    f"scheduled."
+                )
+            )
+
+            db.session.add(
+                notification
+            )
+
+            active_case.ai_summary = (
+                generate_case_summary(
+                    active_case.symptoms[-500:]
+                )
+            )
+
+            result = f"""
 Appointment Confirmed ✅
 
 Doctor:
@@ -821,36 +646,22 @@ Date:
 
 Time:
 {appointment_time}
-
-OTP:
-{otp}
 """
 
-                active_case.conversation_stage = (
-                    "appointment_confirmed"
-                )
+            active_case.conversation_stage = (
+                "appointment_confirmed"
+            )
 
-            else:
-
-                result = (
-                    "You already have "
-                    "an active appointment."
-                )
-                # -----------------------------------
-# APPOINTMENT CONFIRMED
-# -----------------------------------
+        # APPOINTMENT CONFIRMED
 
         elif current_stage == "appointment_confirmed":
 
             result = (
-                "Your appointment has already "
-                "been scheduled successfully. "
-                "Please wait for your consultation."
+                "Your appointment has "
+                "already been scheduled."
             )
 
-        # -----------------------------------
         # DANGER DETECTION
-        # -----------------------------------
 
         high_keywords = [
 
@@ -883,20 +694,16 @@ OTP:
 
             danger_level = "Medium"
 
-        # -----------------------------------
         # UPDATE CASE
-        # -----------------------------------
+
+        medical_stages = [
+
+            "collecting_symptoms",
+
+            "asking_more_symptoms"
+        ]
 
         if active_case:
-
-            # SAVE SYMPTOMS
-
-            medical_stages = [
-
-                "collecting_symptoms",
-
-                "asking_more_symptoms"
-            ]
 
             if (
                 symptoms
@@ -907,12 +714,11 @@ OTP:
 
                     active_case.symptoms += (
                         f"\n{symptoms}"
-                )
+                    )
 
                 else:
 
                     active_case.symptoms = symptoms
-            # LIMIT SYMPTOMS SIZE
 
             if len(active_case.symptoms) > 1000:
 
@@ -920,20 +726,17 @@ OTP:
                     active_case.symptoms[-1000:]
                 )
 
-            # SAVE AI RESPONSE
-
             active_case.ai_response = result
-            
-            # LIVE SUMMARY UPDATE
-            
+
             active_case.ai_summary = (
                 generate_case_summary(
                     active_case.symptoms[-500:]
                 )
             )
-            
-            active_case.danger_level = danger_level
-            # CHAT HISTORY
+
+            active_case.danger_level = (
+                danger_level
+            )
 
             if not active_case.chat_history:
 
@@ -949,25 +752,17 @@ OTP:
 ||END||
 """
 
-            # LIMIT CHAT MEMORY
-
             if len(active_case.chat_history) > 2000:
 
                 active_case.chat_history = (
                     active_case.chat_history[-2000:]
                 )
 
-            # UPDATE STAGE
-
             if current_stage == "collecting_symptoms":
 
                 active_case.conversation_stage = (
                     "asking_more_symptoms"
                 )
-
-        # -----------------------------------
-        # CREATE NEW CASE
-        # -----------------------------------
 
         else:
 
@@ -980,7 +775,6 @@ OTP:
                 ai_summary="",
 
                 chat_history=f"""
-
 ||USER||
 {symptoms}
 ||END||
@@ -1003,13 +797,7 @@ OTP:
                 active_case
             )
 
-        # SINGLE COMMIT ONLY
-
         db.session.commit()
-
-    # -----------------------------------
-    # LOAD RECENT CASES
-    # -----------------------------------
 
     user_cases = (
 
@@ -1035,6 +823,8 @@ OTP:
 
         active_case=active_case
     )
+
+
 @app.route("/supervisor")
 @login_required
 def supervisor_dashboard():
@@ -1138,22 +928,7 @@ def add_report(appointment_id):
             url_for("dashboard")
         )
 
-    # OTP VERIFICATION CHECK
-
-    if not appointment.otp_verified:
-
-        flash(
-            "Meeting OTP verification required.",
-            "danger"
-        )
-
-        return redirect(
-            url_for(
-                "verify_appointment_otp",
-                appointment_id=appointment.id
-            )
-        )
-
+    
     # RELATED CASE
 
     related_case = Case.query.get(
@@ -1399,19 +1174,6 @@ def logout():
     logout_user()
 
     return redirect("/login")
-# VERIFY APPOINTMENT OTP
-@app.route(
-    "/verify-appointment-otp/<int:appointment_id>",
-    methods=["GET", "POST"]
-)
-@login_required
-def verify_appointment_otp(
-    appointment_id
-):
-
-    appointment = Appointment.query.get(
-        appointment_id
-    )
 
     # ONLY SUPERVISOR
 
