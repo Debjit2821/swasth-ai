@@ -388,6 +388,8 @@ def home():
 
     danger_level = "Low"
 
+    user_cases = []
+
     # ACTIVE CASE
 
     active_case = (
@@ -870,18 +872,16 @@ def home():
                     active_case.conversation_stage = (
                         "appointment_confirmed"
                     )
-        user_cases = (
-
-            Case.query.filter_by(
-                user_id=current_user.id
-            )
-            .order_by(
-                Case.id.desc()
-            )
-            .limit(10)
-            .all()
-           )       
-
+    user_cases = (
+        Case.query.filter_by(
+            user_id=current_user.id
+        )
+        .order_by(
+            Case.id.desc()
+        )
+        .limit(10)
+        .all()
+    )
     return render_template(
             
             "index.html",
