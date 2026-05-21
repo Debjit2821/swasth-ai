@@ -896,7 +896,7 @@ OTP:
                 if active_case.symptoms:
 
                     active_case.symptoms += (
-                    f"\n{symptoms}"
+                        f"\n{symptoms}"
                 )
 
                 else:
