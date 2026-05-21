@@ -882,18 +882,18 @@ def home():
             .all()
            )       
 
-        return render_template(
+    return render_template(
             
-                "index.html",
+            "index.html",
 
-                result=result,
+            result=result,
 
-                symptoms=symptoms,
+            symptoms=symptoms,
 
-                user_cases=user_cases,
+            user_cases=user_cases,
 
-                active_case=active_case
-            )
+            active_case=active_case
+        )
       
 @app.route("/supervisor")
 @login_required
