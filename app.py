@@ -1,4 +1,4 @@
-from unittest import result
+
 
 from flask import Flask, flash, render_template, request, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -95,6 +95,7 @@ db.init_app(app)
 # LOGIN MANAGER
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = "login"
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -121,7 +122,11 @@ def register():
 
         name = request.form["name"]
 
-        email = request.form["email"]
+        email = (
+            request.form["email"]
+            .lower()
+            .strip()
+)
 
         password = request.form["password"]
 
@@ -268,7 +273,12 @@ def dashboard():
         user_id=current_user.id
     ).all()
 
-    reports = Report.query.all()
+    reports = (
+    Report.query
+    .order_by(Report.id.desc())
+    .limit(10)
+    .all()
+)
 
     appointments = Appointment.query.filter_by(
         patient_id=current_user.id
@@ -278,9 +288,14 @@ def dashboard():
         role="supervisor"
     ).all()
 
-    notifications = Notification.query.filter_by(
+    notifications =(
+         Notification.query.filter_by(
         user_id=current_user.id
-    ).all()
+    )
+    .order_by(Notification.id.desc())
+    .limit(10)
+    .all()
+)
 
     return render_template(
         "dashboard.html",
@@ -373,22 +388,26 @@ def home():
 
     symptoms = ""
 
-    specialist = "General Physician"
-
     danger_level = "Low"
 
     # ACTIVE CASE
 
-    active_case = Case.query.filter_by(
-        user_id=current_user.id,
-        status="Pending"
-    ).first()
+    active_case = (
+        Case.query.filter_by(
+            user_id=current_user.id,
+            status="Pending"
+        )
+        .first()
+    )
 
     # DEFAULT STAGE
 
     current_stage = "collecting_symptoms"
 
-    if active_case and active_case.conversation_stage:
+    if (
+        active_case
+        and active_case.conversation_stage
+    ):
 
         current_stage = (
             active_case.conversation_stage
@@ -400,11 +419,10 @@ def home():
 
     if request.method == "POST":
 
-        symptoms = request.form[
-            "symptoms"
-        ].strip()
-
-        # EMPTY MESSAGE
+        symptoms = request.form.get(
+            "symptoms",
+            ""
+        ).strip()
 
         if not symptoms:
 
@@ -412,8 +430,12 @@ def home():
                 url_for("home")
             )
 
+        # LIMIT USER INPUT
+
+        symptoms = symptoms[:300]
+
         # -----------------------------------
-        # SIMPLE NON-MEDICAL WORDS
+        # SIMPLE CHAT
         # -----------------------------------
 
         non_medical_keywords = [
@@ -428,77 +450,43 @@ def home():
 
         if symptoms.lower() in non_medical_keywords:
 
-            result = """
-Please describe your medical symptoms so I can assist you.
-"""
-
-            if active_case:
-
-                if not active_case.chat_history:
-
-                    active_case.chat_history = ""
-
-                active_case.chat_history += f"""
-||USER||
-{symptoms}
-||END||
-
-||AI||
-{result}
-||END||
-"""
-                # LIMIT SYMPTOM MEMORY
-
-            if len(active_case.symptoms) > 2000:
-
-                active_case.symptoms = (
-                    active_case.symptoms[-2000:]
-                    )
-
-                db.session.commit()
-
-            user_cases = Case.query.filter_by(
-                user_id=current_user.id
-            ).all()
-
-            return render_template(
-
-                "index.html",
-
-                result=result,
-
-                symptoms=symptoms,
-
-                user_cases=user_cases,
-
-                active_case=active_case
+            result = (
+                "Please describe your "
+                "medical symptoms so "
+                "I can assist you."
             )
 
         # -----------------------------------
         # STAGE 1
         # -----------------------------------
 
-        if current_stage == "collecting_symptoms":
+        elif current_stage == "collecting_symptoms":
 
             conversation_context = symptoms
 
-            if active_case and active_case.symptoms:
+            if (
+                active_case
+                and active_case.symptoms
+            ):
 
                 conversation_context = (
 
-                    active_case.symptoms[-1000:]
-                    + "\n" +
-                    symptoms
+                    active_case.symptoms[-500:]
+                    + "\n"
+                    + symptoms
                 )
 
-            result, specialist = analyze_symptoms(
-                conversation_context
+            result, specialist = (
+                analyze_symptoms(
+                    conversation_context
+                )
             )
 
-            result += """
-
-Do you have any other symptoms? (yes/no)
-"""
+            result += (
+                "\n\nDo you have any "
+                "other symptoms? "
+                "(yes/no)"
+            )
 
         # -----------------------------------
         # STAGE 2
@@ -508,9 +496,10 @@ Do you have any other symptoms? (yes/no)
 
             if symptoms.lower() == "yes":
 
-                result = """
-Please describe your additional symptoms.
-"""
+                result = (
+                    "Please describe "
+                    "your additional symptoms."
+                )
 
             elif symptoms.lower() == "no":
 
@@ -518,26 +507,32 @@ Please describe your additional symptoms.
                     "appointment_mode"
                 )
 
-                result = """
-Would you like an Online or Offline consultation?
-"""
+                result = (
+                    "Would you like "
+                    "an Online or Offline "
+                    "consultation?"
+                )
 
             else:
 
                 conversation_context = (
-                    active_case.symptoms
-                    + "\n" +
-                    symptoms
+
+                    active_case.symptoms[-500:]
+                    + "\n"
+                    + symptoms
                 )
 
-                result, specialist = analyze_symptoms(
-                    conversation_context
+                result, specialist = (
+                    analyze_symptoms(
+                        conversation_context
+                    )
                 )
 
-                result += """
-
-Do you have any other symptoms? (yes/no)
-"""
+                result += (
+                    "\n\nDo you have any "
+                    "other symptoms? "
+                    "(yes/no)"
+                )
 
         # -----------------------------------
         # STAGE 3
@@ -545,20 +540,19 @@ Do you have any other symptoms? (yes/no)
 
         elif current_stage == "appointment_mode":
 
-            active_case.appointment_mode = symptoms
+            active_case.appointment_mode = (
+                symptoms
+            )
 
             active_case.conversation_stage = (
                 "appointment_date"
             )
 
-            result = """
-Great.
-
-Please enter your preferred appointment date.
-
-Example:
-25 May 2026
-"""
+            result = (
+                "Please enter your "
+                "preferred appointment date.\n\n"
+                "Example:\n25 May 2026"
+            )
 
         # -----------------------------------
         # STAGE 4
@@ -574,12 +568,11 @@ Example:
                 "appointment_time"
             )
 
-            result = """
-Please enter your preferred appointment time.
-
-Example:
-8:00 PM
-"""
+            result = (
+                "Please enter your "
+                "preferred appointment time.\n\n"
+                "Example:\n8:00 PM"
+            )
 
         # -----------------------------------
         # STAGE 5
@@ -589,100 +582,108 @@ Example:
 
             appointment_time = symptoms
 
-            specialist = "General Physician"
+            specialist = (
+                "General Physician"
+            )
 
             symptom_text = (
                 active_case.symptoms.lower()
             )
-            
+
             # NEUROLOGY
-            
-            if any(word in symptom_text for word in [
-            
-                "nerve",
-                "brain",
-                "headache",
-                "migraine",
-                "seizure",
-                "memory loss",
-                "numbness",
-                "paralysis",
-                "stroke"
-            
-            ]):
-            
+
+            if any(
+                word in symptom_text
+                for word in [
+
+                    "nerve",
+                    "brain",
+                    "headache",
+                    "migraine",
+                    "seizure",
+                    "memory",
+                    "numbness",
+                    "stroke"
+                ]
+            ):
+
                 specialist = "Neurologist"
-            
+
             # HEART
-            
-            elif any(word in symptom_text for word in [
-            
-                "heart",
-                "chest pain",
-                "blood pressure",
-                "palpitations"
-            
-            ]):
-            
+
+            elif any(
+                word in symptom_text
+                for word in [
+
+                    "heart",
+                    "chest pain",
+                    "palpitations",
+                    "blood pressure"
+                ]
+            ):
+
                 specialist = "Cardiologist"
-            
+
             # SKIN
-            
-            elif any(word in symptom_text for word in [
-            
-                "skin",
-                "rash",
-                "acne",
-                "itching",
-                "allergy"
-            
-            ]):
-            
+
+            elif any(
+                word in symptom_text
+                for word in [
+
+                    "skin",
+                    "rash",
+                    "acne",
+                    "itching"
+                ]
+            ):
+
                 specialist = "Dermatologist"
-            
-            # MENTAL HEALTH
-            
-            elif any(word in symptom_text for word in [
-            
-                "anxiety",
-                "depression",
-                "stress",
-                "panic",
-                "mental"
-            
-            ]):
+
+            # MENTAL
+
+            elif any(
+                word in symptom_text
+                for word in [
+
+                    "anxiety",
+                    "stress",
+                    "panic",
+                    "depression"
+                ]
+            ):
 
                 specialist = "Psychiatrist"
 
             # FIND DOCTOR
 
-            doctor = User.query.filter_by(
-
-                role="supervisor",
-
-                specialization=specialist,
-
-                approved=True
-
-            ).first()
+            doctor = (
+                User.query.filter_by(
+                    role="supervisor",
+                    specialization=specialist,
+                    approved=True
+                )
+                .first()
+            )
 
             # FALLBACK
 
             if not doctor:
 
-                doctor = User.query.filter_by(
+                doctor = (
+                    User.query.filter_by(
+                        role="supervisor",
+                        specialization=(
+                            "General Physician"
+                        ),
+                        approved=True
+                    )
+                    .first()
+                )
 
-                    role="supervisor",
-
-                    specialization="General Physician",
-
-                    approved=True
-
-                ).first()
-
-            # EXISTING APPOINTMENT
+            # CHECK ACTIVE APPOINTMENT
 
             existing_appointment = (
+
                 Appointment.query.filter_by(
                     patient_id=current_user.id,
                     status="Scheduled"
@@ -692,47 +693,58 @@ Example:
                 )
                 .first()
             )
-            if not existing_appointment and doctor:
+
+            if (
+                not existing_appointment
+                and doctor
+            ):
 
                 otp = generate_otp()
-                # SEND OTP EMAIL
 
-                msg = Message(
-                
-                    "SWASTH-AI Appointment OTP",
+                # SEND EMAIL
 
-                    sender=app.config[
-                        "MAIL_USERNAME"
-                    ],
+                try:
 
-                    recipients=[current_user.email]
-                )
+                    msg = Message(
 
-                msg.body = f"""
-                Hello {current_user.name},
+                        "SWASTH-AI Appointment OTP",
 
-                Your consultation OTP is:
+                        sender=app.config[
+                            "MAIL_USERNAME"
+                        ],
 
-                {otp}
+                        recipients=[
+                            current_user.email
+                        ]
+                    )
 
-                Please share this OTP with your doctor during consultation.
+                    msg.body = f"""
+Hello {current_user.name},
 
-                Appointment Details:
+Your consultation OTP is:
 
-                Doctor:
-                Dr. {doctor.name}
+{otp}
 
-                Date:
-                {active_case.appointment_selected_date}
+Doctor:
+Dr. {doctor.name}
 
-                Time:
-                {appointment_time}
+Date:
+{active_case.appointment_selected_date}
 
-                Thank you,
-                SWASTH-AI
-                """
+Time:
+{appointment_time}
 
-                mail.send(msg)
+Thank you,
+SWASTH-AI
+"""
+
+                    mail.send(msg)
+
+                except Exception as e:
+
+                    print(e)
+
+                # CREATE APPOINTMENT
 
                 appointment = Appointment(
 
@@ -743,10 +755,13 @@ Example:
                     case_id=active_case.id,
 
                     appointment_date=(
-                        active_case.appointment_selected_date
+                        active_case
+                        .appointment_selected_date
                     ),
 
-                    appointment_time=appointment_time,
+                    appointment_time=(
+                        appointment_time
+                    ),
 
                     meeting_otp=otp,
 
@@ -763,16 +778,23 @@ Example:
 
                     user_id=current_user.id,
 
-                    message=f"""
-Appointment scheduled with
-Dr. {doctor.name}
-on {active_case.appointment_selected_date}
-at {appointment_time}.
-"""
+                    message=(
+                        f"Appointment with "
+                        f"Dr. {doctor.name} "
+                        f"scheduled."
+                    )
                 )
 
                 db.session.add(
                     notification
+                )
+
+                # GENERATE SUMMARY ONLY HERE
+
+                active_case.ai_summary = (
+                    generate_case_summary(
+                        active_case.symptoms[-500:]
+                    )
                 )
 
                 result = f"""
@@ -784,22 +806,14 @@ Dr. {doctor.name}
 Specialization:
 {doctor.specialization}
 
-Mode:
-{active_case.appointment_mode}
-
 Date:
 {active_case.appointment_selected_date}
 
 Time:
 {appointment_time}
 
-MEETING OTP:
+OTP:
 {otp}
-
-Please share this OTP with your doctor during consultation.
-
-Status:
-Scheduled
 """
 
                 active_case.conversation_stage = (
@@ -808,9 +822,10 @@ Scheduled
 
             else:
 
-                result = """
-You already have an active appointment.
-"""
+                result = (
+                    "You already have "
+                    "an active appointment."
+                )
 
         # -----------------------------------
         # FOLLOW-UP
@@ -818,24 +833,21 @@ You already have an active appointment.
 
         elif current_stage == "follow_up":
 
-            previous_context = f"""
+            context = f"""
 Previous Symptoms:
-{active_case.symptoms}
+{active_case.symptoms[-500:]}
 
-Doctor Report:
-{active_case.ai_summary}
-
-Current Patient Update:
+Current Update:
 {symptoms}
 """
 
-            result, specialist = analyze_symptoms(
-                previous_context
+            result, specialist = (
+                analyze_symptoms(
+                    context
+                )
             )
 
             result += """
-
-Based on your current condition:
 
 1. Continue Consultation
 2. Close Consultation
@@ -855,11 +867,10 @@ Based on your current condition:
 
                 active_case.status = "Resolved"
 
-                result = """
-Consultation closed successfully.
-
-We wish you good health ❤️
-"""
+                result = (
+                    "Consultation closed "
+                    "successfully."
+                )
 
             else:
 
@@ -867,11 +878,9 @@ We wish you good health ❤️
                     "collecting_symptoms"
                 )
 
-                result = """
-Consultation reopened.
-
-Please describe your current symptoms.
-"""
+                result = (
+                    "Consultation reopened."
+                )
 
         # -----------------------------------
         # DANGER DETECTION
@@ -882,7 +891,6 @@ Please describe your current symptoms.
             "heart attack",
             "stroke",
             "breathing difficulty",
-            "chest pain",
             "critical",
             "unconscious"
         ]
@@ -892,39 +900,35 @@ Please describe your current symptoms.
             "fever",
             "infection",
             "vomiting",
-            "pain",
-            "dizziness"
+            "pain"
         ]
 
-        for word in high_keywords:
+        if any(
+            word in result.lower()
+            for word in high_keywords
+        ):
 
-            if word in result.lower():
+            danger_level = "High"
 
-                danger_level = "High"
+        elif any(
+            word in result.lower()
+            for word in medium_keywords
+        ):
 
-        for word in medium_keywords:
-
-            if (
-                word in result.lower()
-                and danger_level != "High"
-            ):
-
-                danger_level = "Medium"
+            danger_level = "Medium"
 
         # -----------------------------------
-        # UPDATE EXISTING CASE
+        # UPDATE CASE
         # -----------------------------------
 
         if active_case:
 
-            medical_stages = [
+            if current_stage in [
 
                 "collecting_symptoms",
                 "asking_more_symptoms",
                 "follow_up"
-            ]
-
-            if current_stage in medical_stages:
+            ]:
 
                 if active_case.symptoms:
 
@@ -936,13 +940,15 @@ Please describe your current symptoms.
 
                     active_case.symptoms = symptoms
 
-            active_case.ai_response = result
+            # LIMIT SYMPTOMS
 
-            active_case.ai_summary = (
-                generate_case_summary(
-                    active_case.symptoms
+            if len(active_case.symptoms) > 1000:
+
+                active_case.symptoms = (
+                    active_case.symptoms[-1000:]
                 )
-            )
+
+            active_case.ai_response = result
 
             active_case.danger_level = (
                 danger_level
@@ -952,25 +958,26 @@ Please describe your current symptoms.
 
                 active_case.chat_history = ""
 
-            active_case.chat_history += f"""
-||USER||
-{symptoms}
-||END||
+            # LIGHTWEIGHT CHAT HISTORY
 
-||AI||
-{result}
-||END||
-"""
-        
-# LIMIT SYMPTOM MEMORY
+            active_case.chat_history += (
 
-            if len(active_case.chat_history) > 5000:
+                f"User: {symptoms[:200]}\n"
 
-                active_case.chat_history = (
-                    active_case.chat_history[-5000:]
+                f"AI: {result[:300]}\n"
             )
 
-            if current_stage == "collecting_symptoms":
+            # LIMIT CHAT MEMORY
+
+            if len(active_case.chat_history) > 2000:
+
+                active_case.chat_history = (
+                    active_case.chat_history[-2000:]
+                )
+
+            if current_stage == (
+                "collecting_symptoms"
+            ):
 
                 active_case.conversation_stage = (
                     "asking_more_symptoms"
@@ -984,27 +991,18 @@ Please describe your current symptoms.
 
             active_case = Case(
 
-                symptoms=(
-                    symptoms
-                    if current_stage == "collecting_symptoms"
-                    else ""
-                ),
+                symptoms=symptoms,
 
                 ai_response=result,
 
-                ai_summary=generate_case_summary(
-                    symptoms
+                ai_summary="",
+
+                chat_history=(
+
+                    f"User: {symptoms}\n"
+
+                    f"AI: {result}\n"
                 ),
-
-                chat_history=f"""
-||USER||
-{symptoms}
-||END||
-
-||AI||
-{result}
-||END||
-""",
 
                 danger_level=danger_level,
 
@@ -1015,17 +1013,29 @@ Please describe your current symptoms.
                 )
             )
 
-            db.session.add(active_case)
+            db.session.add(
+                active_case
+            )
+
+        # SINGLE COMMIT ONLY
 
         db.session.commit()
 
     # -----------------------------------
-    # LOAD CASES
+    # LOAD RECENT CASES
     # -----------------------------------
 
-    user_cases = Case.query.filter_by(
-        user_id=current_user.id
-    ).all()
+    user_cases = (
+
+        Case.query.filter_by(
+            user_id=current_user.id
+        )
+        .order_by(
+            Case.id.desc()
+        )
+        .limit(10)
+        .all()
+    )
 
     return render_template(
 
@@ -1116,21 +1126,7 @@ before closing consultation.
     db.session.commit()
 
     return redirect("/supervisor-appointments")
-    # NOTIFICATION
-
-    notification = Notification(
-        user_id=appointment.patient_id,
-        message="""
-Your consultation has been completed.
-Please review your medical report.
-"""
-    )
-
-    db.session.add(notification)
-
-    db.session.commit()
-
-    return redirect("/supervisor-appointments")
+   
 # ADD DOCTOR REPORT
 @app.route(
     "/add-report/<int:appointment_id>",
@@ -1539,7 +1535,7 @@ This link expires in 30 minutes.
                 flash(
                     "Email sending failed.",
                     "danger"
-    )
+                )
 
         else:
 
@@ -1627,6 +1623,16 @@ def google_login():
 def google_authorized():
 
     token = google.authorize_access_token()
+    if not token:
+
+        flash(
+            "Google login failed.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("login")
+        )
 
     user_info = token.get(
         "userinfo"
