@@ -668,7 +668,7 @@ def home():
             # FALLBACK
 
             if not doctor:
-
+            
                 doctor = (
                     User.query.filter_by(
                         role="supervisor",
@@ -679,116 +679,126 @@ def home():
                     )
                     .first()
                 )
-
+            
             # CHECK ACTIVE APPOINTMENT
-
-                existing_appointment = (
-                
-                    Appointment.query.filter_by(
-                        patient_id=current_user.id
-                    )
-                    .filter(
-                    
-                        Appointment.status.in_(
-                        
-                            [
-                                "Scheduled",
-                                "Confirmed"
-                            ]
-                        )
-                    )
-                    .first()
+            
+            existing_appointment = (
+            
+                Appointment.query.filter_by(
+                    patient_id=current_user.id
                 )
+                .filter(
+                
+                    Appointment.status.in_(
+                    
+                        [
+                            "Scheduled",
+                            "Confirmed"
+                        ]
+                    )
+                )
+                .first()
+            )
+            
+            # DEVELOPMENT MODE
+            # IGNORE OLD APPOINTMENTS
+            
+            existing_appointment = None
+            
+            if (
+                not existing_appointment
+                and doctor
+            ):
+            
                 otp = generate_otp()
-
+            
                 # SEND EMAIL
-
+            
                 try:
-
+                
                     msg = Message(
-
+                    
                         "SWASTH-AI Appointment OTP",
-
+            
                         sender=app.config[
                             "MAIL_USERNAME"
                         ],
-
+            
                         recipients=[
                             current_user.email
                         ]
                     )
-
+            
                     msg.body = f"""
-Hello {current_user.name},
-
-Your consultation OTP is:
-
-{otp}
-
-Doctor:
-Dr. {doctor.name}
-
-Date:
-{active_case.appointment_selected_date}
-
-Time:
-{appointment_time}
-
-Thank you,
-SWASTH-AI
-"""
-
+            Hello {current_user.name},
+            
+            Your consultation OTP is:
+            
+            {otp}
+            
+            Doctor:
+            Dr. {doctor.name}
+            
+            Date:
+            {active_case.appointment_selected_date}
+            
+            Time:
+            {appointment_time}
+            
+            Thank you,
+            SWASTH-AI
+            """
+            
                     mail.send(msg)
-
+            
                 except Exception as e:
-
+                
                     print(e)
-
+            
                 # CREATE APPOINTMENT
-
+            
                 appointment = Appointment(
-
+                
                     patient_id=current_user.id,
-
+            
                     supervisor_id=doctor.id,
-
+            
                     case_id=active_case.id,
-
+            
                     appointment_date=(
                         active_case
                         .appointment_selected_date
                     ),
-
+            
                     appointment_time=(
                         appointment_time
                     ),
-
+            
                     meeting_otp=otp,
-
+            
                     otp_verified=False,
-
+            
                     status="Scheduled"
                 )
-
+            
                 db.session.add(
                     appointment
                 )
-
+            
                 notification = Notification(
-
+                
                     user_id=current_user.id,
-
+            
                     message=(
                         f"Appointment with "
                         f"Dr. {doctor.name} "
                         f"scheduled."
                     )
                 )
-
+            
                 db.session.add(
                     notification
                 )
-
                 # GENERATE SUMMARY ONLY HERE
 
                 active_case.ai_summary = (
