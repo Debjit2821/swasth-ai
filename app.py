@@ -628,6 +628,44 @@ Example:
             if not existing_appointment and doctor:
 
                 otp = generate_otp()
+                # SEND OTP EMAIL
+
+                msg = Message(
+                
+                    "SWASTH-AI Appointment OTP",
+                
+                    sender=app.config[
+                        "MAIL_USERNAME"
+                    ],
+                
+                    recipients=[current_user.email]
+                )
+                
+                msg.body = f"""
+                Hello {current_user.name},
+                
+                Your consultation OTP is:
+                
+                {otp}
+                
+                Please share this OTP with your doctor during consultation.
+                
+                Appointment Details:
+                
+                Doctor:
+                Dr. {doctor.name}
+                
+                Date:
+                {active_case.appointment_selected_date}
+                
+                Time:
+                {appointment_time}
+                
+                Thank you,
+                SWASTH-AI
+                """
+                
+                mail.send(msg)
 
                 appointment = Appointment(
 
