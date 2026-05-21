@@ -870,6 +870,31 @@ def home():
                     active_case.conversation_stage = (
                         "appointment_confirmed"
                     )
+        user_cases = (
+
+            Case.query.filter_by(
+                user_id=current_user.id
+            )
+            .order_by(
+                Case.id.desc()
+            )
+            .limit(10)
+            .all()
+           )       
+
+        return render_template(
+            
+                "index.html",
+
+                result=result,
+
+                symptoms=symptoms,
+
+                user_cases=user_cases,
+
+                active_case=active_case
+            )
+      
 @app.route("/supervisor")
 @login_required
 def supervisor_dashboard():
