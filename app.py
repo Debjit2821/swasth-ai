@@ -828,61 +828,6 @@ OTP:
                 )
 
         # -----------------------------------
-        # FOLLOW-UP
-        # -----------------------------------
-
-        elif current_stage == "follow_up":
-
-            context = f"""
-Previous Symptoms:
-{active_case.symptoms[-500:]}
-
-Current Update:
-{symptoms}
-"""
-
-            result, specialist = (
-                analyze_symptoms(
-                    context
-                )
-            )
-
-            result += """
-
-1. Continue Consultation
-2. Close Consultation
-"""
-
-            active_case.conversation_stage = (
-                "follow_up_complete"
-            )
-
-        # -----------------------------------
-        # FOLLOW-UP COMPLETE
-        # -----------------------------------
-
-        elif current_stage == "follow_up_complete":
-
-            if "close" in symptoms.lower():
-
-                active_case.status = "Resolved"
-
-                result = (
-                    "Consultation closed "
-                    "successfully."
-                )
-
-            else:
-
-                active_case.conversation_stage = (
-                    "collecting_symptoms"
-                )
-
-                result = (
-                    "Consultation reopened."
-                )
-
-        # -----------------------------------
         # DANGER DETECTION
         # -----------------------------------
 
@@ -923,24 +868,19 @@ Current Update:
 
         if active_case:
 
-            if current_stage in [
+            # SAVE SYMPTOMS
 
-                "collecting_symptoms",
-                "asking_more_symptoms",
-                "follow_up"
-            ]:
+            if symptoms:
 
                 if active_case.symptoms:
 
-                    active_case.symptoms += (
-                        f"\n{symptoms}"
-                    )
+                    active_case.symptoms += f"\n{symptoms}"
 
                 else:
 
                     active_case.symptoms = symptoms
 
-            # LIMIT SYMPTOMS
+            # LIMIT SYMPTOMS SIZE
 
             if len(active_case.symptoms) > 1000:
 
@@ -948,24 +888,26 @@ Current Update:
                     active_case.symptoms[-1000:]
                 )
 
+            # SAVE AI RESPONSE
+
             active_case.ai_response = result
 
-            active_case.danger_level = (
-                danger_level
-            )
+            active_case.danger_level = danger_level
+
+            # CHAT HISTORY
 
             if not active_case.chat_history:
 
                 active_case.chat_history = ""
 
-            # LIGHTWEIGHT CHAT HISTORY
+            active_case.chat_history += f"""
+USER:
+{symptoms[:200]}
 
-            active_case.chat_history += (
+AI:
+{result[:300]}
 
-                f"User: {symptoms[:200]}\n"
-
-                f"AI: {result[:300]}\n"
-            )
+"""
 
             # LIMIT CHAT MEMORY
 
@@ -975,9 +917,9 @@ Current Update:
                     active_case.chat_history[-2000:]
                 )
 
-            if current_stage == (
-                "collecting_symptoms"
-            ):
+            # UPDATE STAGE
+
+            if current_stage == "collecting_symptoms":
 
                 active_case.conversation_stage = (
                     "asking_more_symptoms"
