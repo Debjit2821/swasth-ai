@@ -754,11 +754,27 @@ def home():
 
                 "10am": "10:00 AM",
 
+                "10 am": "10:00 AM",
+
+                "10": "10:00 AM",
+
+                "12 pm": "12:00 PM",
+
+                "12": "12:00 PM",
+
                 "12pm": "12:00 PM",
+
+                "3 pm": "3:00 PM",
+
+                "3": "3:00 PM",
 
                 "3pm": "3:00 PM",
 
-                "6pm": "6:00 PM"
+                "6pm": "6:00 PM",
+
+                "6 pm": "6:00 PM",
+
+                "6": "6:00 PM"
             }
 
             # INVALID SLOT
@@ -932,7 +948,7 @@ def home():
 
     if result:
         if not active_case.chat_history:
-
+        
             active_case.chat_history = ""
         active_case.chat_history += (
             f"||AI|| {result} ||END||"
