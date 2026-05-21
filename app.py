@@ -627,38 +627,64 @@ def home():
 
         elif current_stage == "appointment_mode":
 
-            active_case.appointment_mode = (
-                symptoms
-            )
+            # VALIDATE CONSULTATION TYPE
 
-            active_case.conversation_stage = (
-                "appointment_date"
-            )
+            if symptoms.lower() not in [
+            
+                "online",
+                "offline"
+            ]:
 
-            result = (
-                "Please enter your "
-                "preferred appointment date.\n\n"
-                "Example:\n25 May 2026"
-            )
+                result = (
+                    "Please choose either "
+                    "'Online' or 'Offline' "
+                    "consultation."
+                )
 
+            else:
+
+                active_case.appointment_mode = (
+                    symptoms.capitalize()
+                )
+
+                active_case.conversation_stage = (
+                    "appointment_date"
+                )
+
+                result = (
+                    "Please enter your "
+                    "preferred appointment date.\n\n"
+                    "Example:\n25 May 2026"
+                )
         # STAGE 4
 
         elif current_stage == "appointment_date":
 
-            active_case.appointment_selected_date = (
-                symptoms
-            )
+    # BASIC DATE VALIDATION
 
-            active_case.conversation_stage = (
-                "appointment_time"
-            )
+            if len(symptoms.split()) < 2:
 
-            result = (
-                "Please enter your "
-                "preferred appointment time.\n\n"
-                "Example:\n8:00 PM"
-            )
+                result = (
+                    "Please enter a valid "
+                    "appointment date.\n\n"
+                    "Example:\n25 May 2026"
+                )
 
+            else:
+
+                active_case.appointment_selected_date = (
+                    symptoms
+                )
+
+                active_case.conversation_stage = (
+                    "appointment_time"
+                )
+
+                result = (
+                    "Please enter your "
+                    "preferred appointment time.\n\n"
+                    "Example:\n8:00 PM"
+                )
         # STAGE 5
 
         elif current_stage == "appointment_time":
