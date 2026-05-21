@@ -447,6 +447,13 @@ Please describe your medical symptoms so I can assist you.
 {result}
 ||END||
 """
+                # LIMIT SYMPTOM MEMORY
+
+            if len(active_case.symptoms) > 2000:
+
+                active_case.symptoms = (
+                    active_case.symptoms[-2000:]
+                    )
 
                 db.session.commit()
 
@@ -479,7 +486,7 @@ Please describe your medical symptoms so I can assist you.
 
                 conversation_context = (
 
-                    active_case.symptoms
+                    active_case.symptoms[-1000:]
                     + "\n" +
                     symptoms
                 )
@@ -954,6 +961,14 @@ Please describe your current symptoms.
 {result}
 ||END||
 """
+        
+# LIMIT SYMPTOM MEMORY
+
+            if len(active_case.chat_history) > 5000:
+
+                active_case.chat_history = (
+                    active_case.chat_history[-5000:]
+            )
 
             if current_stage == "collecting_symptoms":
 
