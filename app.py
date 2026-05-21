@@ -630,16 +630,16 @@ def home():
             # VALIDATE CONSULTATION TYPE
 
             if symptoms.lower() not in [
-            
+
                 "online",
                 "offline"
-            ]:
+                ]:
 
                 result = (
-                    "Please choose either "
-                    "'Online' or 'Offline' "
-                    "consultation."
-                )
+                 "Please choose either "
+                "'Online' or 'Offline' "
+                "consultation."
+             )
 
             else:
 
@@ -652,28 +652,40 @@ def home():
                 )
 
                 result = (
-                    "Please enter your "
-                    "preferred appointment date.\n\n"
-                    "Example:\n25 May 2026"
+                    "Please choose an appointment date:\n\n"
+
+                    "1. today\n"
+                    "2. tomorrow\n"
+                    "3. day after tomorrow"
                 )
-        # STAGE 4
+
+# STAGE 4
 
         elif current_stage == "appointment_date":
 
-    # BASIC DATE VALIDATION
+            valid_dates = [
+            
+                "today",
+                "tomorrow",
+                "day after tomorrow"
+            ]
 
-            if len(symptoms.split()) < 2:
+    # INVALID DATE
 
+            if symptoms.lower() not in valid_dates:
+            
                 result = (
-                    "Please enter a valid "
-                    "appointment date.\n\n"
-                    "Example:\n25 May 2026"
+                    "Please choose a valid date:\n\n"
+
+                    "1. today\n"
+                    "2. tomorrow\n"
+                    "3. day after tomorrow"
                 )
 
             else:
 
                 active_case.appointment_selected_date = (
-                    symptoms
+                    symptoms.title()
                 )
 
                 active_case.conversation_stage = (
@@ -681,22 +693,59 @@ def home():
                 )
 
                 result = (
-                    "Please enter your "
-                    "preferred appointment time.\n\n"
-                    "Example:\n8:00 PM"
+                    "Please choose a time slot:\n\n"
+
+                    "1. 10am\n"
+                    "2. 12pm\n"
+                    "3. 3pm\n"
+                    "4. 6pm"
                 )
         # STAGE 5
 
-        elif current_stage == "appointment_time":
-
-            appointment_time = symptoms
-
+    elif current_stage == "appointment_time":
+    
+        valid_slots = {
+        
+            "10am": "10:00 AM",
+    
+            "12pm": "12:00 PM",
+    
+            "3pm": "3:00 PM",
+    
+            "6pm": "6:00 PM"
+        }
+    
+        # INVALID SLOT
+    
+        if symptoms.lower() not in valid_slots:
+        
+            result = (
+                "Please choose a valid "
+                "time slot.\n\n"
+    
+                "Available slots:\n"
+                "10am\n"
+                "12pm\n"
+                "3pm\n"
+                "6pm"
+            )
+    
+        else:
+        
+            appointment_time = (
+                valid_slots[
+                    symptoms.lower()
+                ]
+            )
+    
             specialist = (
                 detect_specialist(
                     active_case.symptoms
                 )
             )
-
+    
+            # FIND DOCTOR
+    
             doctor = (
                 User.query.filter_by(
                     role="supervisor",
@@ -705,9 +754,11 @@ def home():
                 )
                 .first()
             )
-
+    
+            # FALLBACK
+    
             if not doctor:
-
+            
                 doctor = (
                     User.query.filter_by(
                         role="supervisor",
@@ -715,265 +766,130 @@ def home():
                     )
                     .first()
                 )
-
-            appointment = Appointment(
-
-                patient_id=current_user.id,
-
+    
+            # CHECK SLOT AVAILABILITY
+    
+            existing_slot = Appointment.query.filter_by(
+            
                 supervisor_id=doctor.id,
-
-                case_id=active_case.id,
-
+    
                 appointment_date=(
-                    active_case
-                    .appointment_selected_date
+                    active_case.appointment_selected_date
                 ),
-
-                appointment_time=(
-                    appointment_time
-                ),
-
+    
+                appointment_time=appointment_time,
+    
                 status="Scheduled"
-            )
-
-            db.session.add(
-                appointment
-            )
-
-            notification = Notification(
-
-                user_id=current_user.id,
-
-                message=(
-                    f"Appointment with "
-                    f"Dr. {doctor.name} "
-                    f"scheduled."
+    
+            ).first()
+    
+            # SLOT ALREADY BOOKED
+    
+            if existing_slot:
+            
+                result = (
+                    f"Sorry, Dr. {doctor.name} "
+                    f"already has an appointment "
+                    f"on {active_case.appointment_selected_date} "
+                    f"at {appointment_time}.\n\n"
+    
+                    "Please choose another slot."
                 )
-            )
-
-            db.session.add(
-                notification
-            )
-
-            active_case.ai_summary = (
-                generate_case_summary(
-                    active_case.symptoms[-500:]
+    
+            else:
+            
+                # CREATE APPOINTMENT
+    
+                appointment = Appointment(
+                
+                    patient_id=current_user.id,
+    
+                    supervisor_id=doctor.id,
+    
+                    case_id=active_case.id,
+    
+                    appointment_date=(
+                        active_case
+                        .appointment_selected_date
+                    ),
+    
+                    appointment_time=(
+                        appointment_time
+                    ),
+    
+                    status="Scheduled"
                 )
-            )
-
-            result = f"""
-Appointment Confirmed ✅
-
-Doctor:
-Dr. {doctor.name}
-
-Specialization:
-{doctor.specialization}
-
-Date:
-{active_case.appointment_selected_date}
-
-Time:
-{appointment_time}
-"""
-
-            active_case.conversation_stage = (
-                "appointment_confirmed"
-            )
-
-        # APPOINTMENT CONFIRMED
-
-        elif current_stage == "appointment_confirmed":
-
-            result = (
-                "Your appointment has "
-                "already been scheduled."
-            )
-
-        # DANGER DETECTION
-
-        high_keywords = [
-
-            "heart attack",
-            "stroke",
-            "breathing difficulty",
-            "critical",
-            "unconscious"
-        ]
-
-        medium_keywords = [
-
-            "fever",
-            "infection",
-            "vomiting",
-            "pain"
-        ]
-
-        if any(
-            word in result.lower()
-            for word in high_keywords
-        ):
-
-            danger_level = "High"
-
-        elif any(
-            word in result.lower()
-            for word in medium_keywords
-        ):
-
-            danger_level = "Medium"
-
-        # UPDATE CASE
-
-        medical_stages = [
-
-            "collecting_symptoms",
-
-            "asking_more_symptoms"
-        ]
-
-        if active_case:
-
-            if (
-                symptoms
-                and current_stage in medical_stages
-            ):
-
-                if active_case.symptoms:
-
-                    active_case.symptoms += (
-                        f"\n{symptoms}"
+    
+                db.session.add(
+                    appointment
+                )
+    
+                # CREATE NOTIFICATION
+    
+                notification = Notification(
+                
+                    user_id=current_user.id,
+    
+                    message=(
+                        f"Appointment with "
+                        f"Dr. {doctor.name} "
+                        f"scheduled."
                     )
-
-                else:
-
-                    active_case.symptoms = symptoms
-
-            if len(active_case.symptoms) > 1000:
-
-                active_case.symptoms = (
-                    active_case.symptoms[-1000:]
                 )
-
-            active_case.ai_response = result
-
-            active_case.ai_summary = (
-                generate_case_summary(
-                    active_case.symptoms[-500:]
+    
+                db.session.add(
+                    notification
                 )
-            )
-
-            active_case.danger_level = (
-                danger_level
-            )
-
-            if not active_case.chat_history:
-
-                active_case.chat_history = ""
-
-            active_case.chat_history += f"""
-||USER||
-{symptoms[:200]}
-||END||
-
-||AI||
-{result[:300]}
-||END||
-"""
-
-            if len(active_case.chat_history) > 2000:
-
-                active_case.chat_history = (
-                    active_case.chat_history[-2000:]
+    
+                # GENERATE SUMMARY
+    
+                active_case.ai_summary = (
+                    generate_case_summary(
+                        active_case.symptoms[-500:]
+                    )
                 )
-
-            if current_stage == "collecting_symptoms":
-
+    
+                # SUCCESS RESPONSE
+    
+                result = f"""
+    Appointment Confirmed ✅
+    
+    Doctor:
+    Dr. {doctor.name}
+    
+    Specialization:
+    {doctor.specialization}
+    
+    Date:
+    {active_case.appointment_selected_date}
+    
+    Time:
+    {appointment_time}
+    """
+    
                 active_case.conversation_stage = (
-                    "asking_more_symptoms"
+                    "appointment_confirmed"
                 )
-
-        else:
-
-            active_case = Case(
-
-                symptoms=symptoms,
-
-                ai_response=result,
-
-                ai_summary="",
-
-                chat_history=f"""
-||USER||
-{symptoms}
-||END||
-
-||AI||
-{result}
-||END||
-""",
-
-                danger_level=danger_level,
-
-                user_id=current_user.id,
-
-                conversation_stage=(
-                    "asking_more_symptoms"
-                )
-            )
-
-            db.session.add(
-                active_case
-            )
-
-        db.session.commit()
-
-    user_cases = (
-
-        Case.query.filter_by(
-            user_id=current_user.id
-        )
-        .order_by(
-            Case.id.desc()
-        )
-        .limit(10)
-        .all()
-    )
-
-    return render_template(
-
-        "index.html",
-
-        result=result,
-
-        symptoms=symptoms,
-
-        user_cases=user_cases,
-
-        active_case=active_case
-    )
-
-
-@app.route("/supervisor")
-@login_required
-def supervisor_dashboard():
-
-    if current_user.role != "supervisor":
-
-        flash("Access denied.")
-
-        return redirect(url_for("dashboard"))
-
-    appointments = Appointment.query.filter_by(
-        supervisor_id=current_user.id
-    ).all()
-
-    cases = Case.query.all()
-
-    return render_template(
-        "supervisor.html",
-        appointments=appointments,
-        cases=cases
+    @app.route("/supervisor")
+    @login_required
+    def supervisor_dashboard():
+    
+        if current_user.role != "supervisor":
+        
+            flash("Access denied.")
+    
+            return redirect(url_for("dashboard"))
+    
+        appointments = Appointment.query.filter_by(
+            supervisor_id=current_user.id
+        ).all()
+    
+        cases = Case.query.all()
+    
+        return render_template(
+            "supervisor.html",
+            appointments=appointments,
+            cases=cases
     )
 # SUPERVISOR APPOINTMENTS
 @app.route("/supervisor-appointments")
