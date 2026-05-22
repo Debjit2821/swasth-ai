@@ -1,0 +1,803 @@
+/* =========================
+   GOOGLE FONT
+========================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* =========================
+   GLOBAL
+========================= */
+
+*{
+
+    margin:0;
+
+    padding:0;
+
+    box-sizing:border-box;
+
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+
+    background:
+    linear-gradient(rgba(0,20,40,0.88),
+    rgba(0,30,60,0.88)),
+    url("https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070");
+
+    background-size:cover;
+
+    background-position:center;
+
+    background-attachment:fixed;
+
+    color:white;
+
+    min-height:100vh;
+
+    overflow-x:hidden;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar{
+
+    background:rgba(0,0,0,0.35) !important;
+
+    backdrop-filter:blur(14px);
+
+    border-bottom:1px solid rgba(255,255,255,0.1);
+
+    padding:18px 40px !important;
+
+    position:sticky;
+
+    top:0;
+
+    z-index:999;
+}
+
+.navbar-brand{
+
+    font-size:32px;
+
+    font-weight:800;
+
+    letter-spacing:1px;
+
+    color:#fff !important;
+
+    text-shadow:0 0 18px rgba(0,255,255,0.45);
+}
+
+/* NAV BUTTONS */
+
+.navbar .btn{
+
+    border:none;
+
+    border-radius:14px;
+
+    padding:10px 24px;
+
+    font-weight:600;
+
+    transition:0.4s;
+}
+
+.navbar .btn-light{
+
+    background:linear-gradient(135deg,#00c6ff,#0072ff);
+
+    color:white !important;
+
+    box-shadow:0 0 20px rgba(0,180,255,0.35);
+}
+
+.navbar .btn-light:hover{
+
+    transform:translateY(-3px) scale(1.05);
+
+    box-shadow:0 0 30px rgba(0,180,255,0.6);
+}
+
+/* =========================
+   CONTAINER
+========================= */
+
+.container{
+
+    width:92% !important;
+
+    max-width:1500px;
+
+    margin:auto;
+
+    padding-top:40px;
+
+    padding-bottom:70px;
+}
+
+/* =========================
+   SECTION HEADINGS
+========================= */
+
+h2{
+
+    font-size:42px;
+
+    font-weight:800;
+
+    margin-bottom:28px !important;
+
+    color:#ffffff;
+
+    text-shadow:0 0 18px rgba(0,255,255,0.3);
+}
+
+/* =========================
+   ALERTS
+========================= */
+
+.alert{
+
+    border:none !important;
+
+    border-radius:20px !important;
+
+    padding:18px 24px !important;
+
+    backdrop-filter:blur(10px);
+
+    font-size:17px;
+
+    font-weight:500;
+}
+
+.alert-warning{
+
+    background:rgba(255,193,7,0.15) !important;
+
+    color:#fff !important;
+
+    border-left:5px solid #ffc107 !important;
+}
+
+.alert-info{
+
+    background:rgba(0,255,255,0.12) !important;
+
+    color:#fff !important;
+
+    border-left:5px solid cyan !important;
+}
+
+.alert-light{
+
+    background:rgba(255,255,255,0.08) !important;
+
+    color:#fff !important;
+}
+
+.alert-primary{
+
+    background:rgba(0,123,255,0.16) !important;
+
+    color:#fff !important;
+
+    border-left:5px solid #00bfff !important;
+}
+
+.alert-secondary{
+
+    background:rgba(255,255,255,0.08) !important;
+
+    color:#fff !important;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.card{
+
+    background:rgba(255,255,255,0.08) !important;
+
+    border:1px solid rgba(255,255,255,0.08) !important;
+
+    backdrop-filter:blur(18px);
+
+    border-radius:28px !important;
+
+    overflow:hidden;
+
+    transition:0.4s ease;
+
+    box-shadow:
+    0 10px 40px rgba(0,0,0,0.35),
+    0 0 25px rgba(0,255,255,0.08);
+}
+
+.card:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:
+    0 15px 45px rgba(0,0,0,0.45),
+    0 0 35px rgba(0,255,255,0.18);
+}
+
+.card-body{
+
+    padding:35px !important;
+}
+
+/* =========================
+   CARD HEADINGS
+========================= */
+
+.card h4{
+
+    font-size:30px;
+
+    font-weight:700;
+
+    margin-bottom:18px;
+
+    color:#fff;
+}
+
+.card h5{
+
+    font-size:22px;
+
+    font-weight:600;
+
+    margin-top:15px;
+
+    margin-bottom:18px;
+}
+
+/* =========================
+   TEXT
+========================= */
+
+.card p{
+
+    font-size:17px;
+
+    color:#e6f7ff;
+
+    margin-bottom:12px;
+
+    line-height:1.7;
+}
+
+strong{
+
+    color:#00e5ff;
+}
+
+/* =========================
+   BADGES
+========================= */
+
+.badge{
+
+    padding:10px 16px;
+
+    border-radius:30px;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    letter-spacing:1px;
+}
+
+.bg-danger{
+
+    background:linear-gradient(135deg,#ff0844,#ff416c) !important;
+}
+
+.bg-warning{
+
+    background:linear-gradient(135deg,#f7971e,#ffd200) !important;
+
+    color:black !important;
+}
+
+.bg-success{
+
+    background:linear-gradient(135deg,#00b09b,#96c93d) !important;
+}
+
+.bg-primary{
+
+    background:linear-gradient(135deg,#00c6ff,#0072ff) !important;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.btn{
+
+    border:none !important;
+
+    border-radius:14px !important;
+
+    padding:12px 24px !important;
+
+    font-weight:600 !important;
+
+    transition:0.4s ease;
+
+    margin-top:10px;
+}
+
+/* PRIMARY */
+
+.btn-primary{
+
+    background:linear-gradient(135deg,#00c6ff,#0072ff) !important;
+
+    box-shadow:0 0 20px rgba(0,180,255,0.3);
+}
+
+.btn-primary:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:0 0 35px rgba(0,180,255,0.6);
+}
+
+/* DARK */
+
+.btn-dark{
+
+    background:linear-gradient(135deg,#232526,#414345) !important;
+}
+
+.btn-dark:hover{
+
+    transform:translateY(-3px);
+}
+
+/* DANGER */
+
+.btn-danger{
+
+    background:linear-gradient(135deg,#ff0844,#ff416c) !important;
+}
+
+.btn-danger:hover{
+
+    transform:translateY(-3px);
+}
+
+/* OUTLINE */
+
+.btn-outline-success{
+
+    border:2px solid #00ffcc !important;
+
+    color:#00ffcc !important;
+
+    background:transparent !important;
+}
+
+.btn-outline-success:hover{
+
+    background:#00ffcc !important;
+
+    color:black !important;
+
+    transform:translateY(-3px);
+}
+
+/* =========================
+   HR
+========================= */
+
+hr{
+
+    border-color:rgba(255,255,255,0.1);
+
+    margin:22px 0;
+}
+
+/* =========================
+   SCROLLBAR
+========================= */
+
+::-webkit-scrollbar{
+
+    width:10px;
+}
+
+::-webkit-scrollbar-track{
+
+    background:#001427;
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:linear-gradient(#00c6ff,#0072ff);
+
+    border-radius:20px;
+}
+
+/* =========================
+   ANIMATION
+========================= */
+
+.card,
+.alert{
+
+    animation:fadeUp 0.7s ease;
+}
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(20px);
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+    }
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:992px){
+
+    .container{
+
+        width:96% !important;
+    }
+
+    h2{
+
+        font-size:32px;
+    }
+
+    .card h4{
+
+        font-size:24px;
+    }
+
+    .navbar{
+
+        padding:16px 20px !important;
+    }
+
+    .navbar-brand{
+
+        font-size:24px;
+    }
+}
+
+@media(max-width:768px){
+
+    .navbar{
+
+        flex-direction:column;
+
+        gap:15px;
+    }
+
+    .card-body{
+
+        padding:24px !important;
+    }
+
+    .btn{
+
+        width:100%;
+
+        margin-bottom:10px;
+    }
+}
+/* =========================
+   PREMIUM GLOW EFFECTS
+========================= */
+
+body::before{
+
+    content:"";
+
+    position:fixed;
+
+    top:-200px;
+
+    left:-200px;
+
+    width:500px;
+
+    height:500px;
+
+    background:rgba(0,255,255,0.12);
+
+    border-radius:50%;
+
+    filter:blur(120px);
+
+    z-index:-1;
+}
+
+body::after{
+
+    content:"";
+
+    position:fixed;
+
+    bottom:-250px;
+
+    right:-250px;
+
+    width:600px;
+
+    height:600px;
+
+    background:rgba(0,140,255,0.18);
+
+    border-radius:50%;
+
+    filter:blur(150px);
+
+    z-index:-1;
+}
+
+/* =========================
+   APPOINTMENT CARDS
+========================= */
+
+.card{
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+.card::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+
+    left:-100%;
+
+    width:100%;
+
+    height:100%;
+
+    background:linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.12),
+    transparent
+    );
+
+    transition:0.8s;
+}
+
+.card:hover::before{
+
+    left:100%;
+}
+
+/* =========================
+   HEADINGS
+========================= */
+
+h2{
+
+    position:relative;
+
+    display:inline-block;
+
+    padding-bottom:12px;
+}
+
+h2::after{
+
+    content:"";
+
+    position:absolute;
+
+    bottom:0;
+
+    left:0;
+
+    width:70%;
+
+    height:4px;
+
+    border-radius:20px;
+
+    background:linear-gradient(
+    90deg,
+    #00e5ff,
+    #0072ff
+    );
+
+    box-shadow:0 0 18px cyan;
+}
+
+/* =========================
+   GLASS NOTIFICATION
+========================= */
+
+.alert-warning{
+
+    background:rgba(255,193,7,0.12) !important;
+
+    backdrop-filter:blur(18px);
+
+    box-shadow:
+    0 0 20px rgba(255,193,7,0.15);
+}
+
+/* =========================
+   CARD CONTENT
+========================= */
+
+.card-body{
+
+    position:relative;
+
+    z-index:2;
+}
+
+/* =========================
+   AI SUMMARY BOX
+========================= */
+
+.alert-primary{
+
+    border-radius:18px !important;
+
+    padding:22px !important;
+
+    font-size:16px;
+
+    line-height:1.8;
+
+    background:
+    linear-gradient(
+    135deg,
+    rgba(0,140,255,0.22),
+    rgba(0,255,255,0.12)
+    ) !important;
+
+    border:1px solid rgba(0,255,255,0.25) !important;
+}
+
+/* =========================
+   MEDICAL REPORT BUTTON
+========================= */
+
+.btn-outline-success{
+
+    background:rgba(0,255,170,0.08) !important;
+
+    backdrop-filter:blur(10px);
+}
+
+/* =========================
+   STATUS BADGES
+========================= */
+
+.badge{
+
+    box-shadow:0 0 12px rgba(255,255,255,0.15);
+
+    font-size:12px;
+}
+
+/* =========================
+   CONTAINER SPACING
+========================= */
+
+.container{
+
+    padding-top:60px;
+}
+
+/* =========================
+   HOVER ZOOM
+========================= */
+
+.card:hover{
+
+    transform:
+    translateY(-10px)
+    scale(1.01);
+}
+
+/* =========================
+   PREMIUM NAVBAR
+========================= */
+
+.navbar{
+
+    box-shadow:
+    0 0 30px rgba(0,150,255,0.22);
+}
+
+/* =========================
+   BUTTON ANIMATION
+========================= */
+
+.btn{
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+.btn::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+
+    left:-120%;
+
+    width:100%;
+
+    height:100%;
+
+    background:linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.35),
+    transparent
+    );
+
+    transition:0.6s;
+}
+
+.btn:hover::before{
+
+    left:120%;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:768px){
+
+    .card{
+
+        border-radius:22px !important;
+    }
+
+    h2{
+
+        font-size:28px;
+    }
+
+    .card h4{
+
+        font-size:22px;
+    }
+}
