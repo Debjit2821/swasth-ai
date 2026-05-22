@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Services - SWASTH-AI</title>
+
+    <link rel="stylesheet"
+          href="../static/home.css">
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <nav>
+
+        <div class="logo">
+            SWASTH-AI
+        </div>
+
+        <div class="nav-links">
+
+            <a href="{{ url_for('root') }}">Home</a>
+
+            <a href="{{ url_for('services') }}">Services</a>
+
+            <a href="{{ url_for('doctors') }}">Doctors</a>
+
+            <a href="{{ url_for('about') }}">About</a>
+
+            <a href="{{ url_for('login') }}"
+               class="login-btn">
+
+                Login
+
+            </a>
+
+        </div>
+
+    </nav>
+
+    <!-- SERVICES PAGE -->
+
+    <section class="services-page">
+
+        <div class="services-title">
+
+            <h1>
+                Our Smart Healthcare Services
+            </h1>
+
+            <p>
+                Advanced AI-powered healthcare solutions designed for modern
+                patients, doctors, hospitals and emergency support systems.
+            </p>
+
+        </div>
+
+        <!-- SERVICES GRID -->
+
+        <div class="services-grid">
+
+            <!-- SERVICE 1 -->
+
+            <div class="service-card">
+
+                <i class="fa-solid fa-heart-pulse"></i>
+
+                <h2>
+                    AI Symptom Analysis
+                </h2>
+
+                <p>
+                    Our AI system instantly analyzes symptoms and predicts
+                    possible disease risks with smart healthcare suggestions.
+                </p>
+
+            </div>
+
+            <!-- SERVICE 2 -->
+
+            <div class="service-card">
+
+                <i class="fa-solid fa-user-doctor"></i>
+
+                <h2>
+                    Doctor Consultation
+                </h2>
+
+                <p>
+                    Connect patients directly with specialist doctors for
+                    instant medical guidance and emergency healthcare support.
+                </p>
+
+            </div>
+
+            <!-- SERVICE 3 -->
+
+            <div class="service-card">
+
+                <i class="fa-solid fa-truck-medical"></i>
+
+                <h2>
+                    Emergency Ambulance
+                </h2>
+
+                <p>
+                    Quick ambulance support and emergency healthcare response
+                    available 24/7 for critical situations.
+                </p>
+
+            </div>
+
+            <!-- SERVICE 4 -->
+
+            <div class="service-card">
+
+                <i class="fa-solid fa-hospital"></i>
+
+                <h2>
+                    Nearby Hospitals
+                </h2>
+
+                <p>
+                    Instantly locate nearby hospitals and emergency centers
+                    using integrated smart location services.
+                </p>
+
+            </div>
+
+            <!-- SERVICE 5 -->
+
+            <div class="service-card">
+
+                <i class="fa-solid fa-notes-medical"></i>
+
+                <h2>
+                    Recovery Tracking
+                </h2>
+
+                <p>
+                    Monitor patient recovery progress using AI-based health
+                    tracking and daily health reports.
+                </p>
+
+            </div>
+
+            <!-- SERVICE 6 -->
+
+            <div class="service-card">
+
+                <i class="fa-solid fa-pills"></i>
+
+                <h2>
+                    Medicine Reminder
+                </h2>
+
+                <p>
+                    Never miss medicine schedules with automated reminders
+                    and smart healthcare notifications.
+                </p>
+
+            </div>
+
+            <!-- SERVICE 7 -->
+
+            <div class="service-card">
+
+                <i class="fa-solid fa-shield-heart"></i>
+
+                <h2>
+                    Secure Medical Records
+                </h2>
+
+                <p>
+                    Patient reports and medical data remain fully protected
+                    with advanced security systems.
+                </p>
+
+            </div>
+
+            <!-- SERVICE 8 -->
+
+            <div class="service-card">
+
+                <i class="fa-solid fa-clock"></i>
+
+                <h2>
+                    24/7 Monitoring
+                </h2>
+
+                <p>
+                    Continuous healthcare monitoring and instant emergency
+                    alerts for safer patient care.
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- EXTRA SECTION -->
+
+        <div class="service-highlight">
+
+            <div class="highlight-left">
+
+                <img src="../static/doctor-ai.jpg">
+
+            </div>
+
+            <div class="highlight-right">
+
+                <h1>
+                    Smart Healthcare Powered By AI
+                </h1>
+
+                <p>
+                    SWASTH-AI combines modern artificial intelligence with
+                    advanced healthcare systems to improve patient safety,
+                    emergency response and healthcare management.
+                </p>
+
+                <ul>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        AI Disease Prediction
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        Instant Doctor Support
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        Emergency Ambulance System
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        Secure Patient Reports
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+        <!-- BACK BUTTON -->
+
+        <div class="back-home">
+
+            <a href="{{ url_for('home') }}"
+
+                ← Back To Home
+
+            </a>
+
+        </div>
+
+    </section>
+
+</body>
+
+</html>

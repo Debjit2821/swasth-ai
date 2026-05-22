@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Important Links - SWASTH-AI</title>
+
+    <link rel="stylesheet"
+          href="../static/home.css">
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <nav>
+
+        <div class="logo">
+
+            SWASTH-AI
+
+        </div>
+
+        <div class="nav-links">
+
+            <a href="{{ url_for('root') }}">Home</a>
+
+            <a href="{{ url_for('services') }}">Services</a>
+
+            <a href="{{ url_for('doctors') }}">Doctors</a>
+
+            <a href="{{ url_for('about') }}">About</a>
+
+            <a href="{{ url_for('login') }}"
+               class="login-btn">
+
+                Login
+
+            </a>
+
+        </div>
+
+    </nav>
+
+    <!-- IMPORTANT LINKS PAGE -->
+
+    <section class="important-page">
+
+        <div class="important-title">
+
+            <h1>
+                Important Medical Links
+            </h1>
+
+            <p>
+                Quick access to important hospitals,
+                emergency services and healthcare resources.
+            </p>
+
+        </div>
+
+        <div class="important-grid">
+
+            <!-- GOVERNMENT HOSPITAL -->
+
+            <div class="important-card">
+
+                <i class="fa-solid fa-hospital"></i>
+
+                <h2>
+                    AIIMS Delhi
+                </h2>
+
+                <p>
+                    India's top government medical hospital and research center.
+                </p>
+
+                <a href="https://www.aiims.edu"
+                   target="_blank">
+
+                    Visit Website
+
+                </a>
+
+            </div>
+
+            <!-- APOLLO -->
+
+            <div class="important-card">
+
+                <i class="fa-solid fa-heart-pulse"></i>
+
+                <h2>
+                    Apollo Hospitals
+                </h2>
+
+                <p>
+                    One of India's best private healthcare hospital chains.
+                </p>
+
+                <a href="https://www.apollohospitals.com"
+                   target="_blank">
+
+                    Visit Website
+
+                </a>
+
+            </div>
+
+            <!-- FORTIS -->
+
+            <div class="important-card">
+
+                <i class="fa-solid fa-user-doctor"></i>
+
+                <h2>
+                    Fortis Healthcare
+                </h2>
+
+                <p>
+                    Advanced multi-speciality hospital services across India.
+                </p>
+
+                <a href="https://www.fortishealthcare.com"
+                   target="_blank">
+
+                    Visit Website
+
+                </a>
+
+            </div>
+
+            <!-- MEDICAL MAP -->
+
+            <div class="important-card">
+
+                <i class="fa-solid fa-map-location-dot"></i>
+
+                <h2>
+                    Nearby Hospitals
+                </h2>
+
+                <p>
+                    Search nearby hospitals and emergency healthcare centers.
+                </p>
+
+                <a href="https://www.google.com/maps/search/hospitals+near+me/"
+                   target="_blank">
+
+                    Open Maps
+
+                </a>
+
+            </div>
+
+            <!-- RED CROSS -->
+
+            <div class="important-card">
+
+                <i class="fa-solid fa-kit-medical"></i>
+
+                <h2>
+                    Indian Red Cross
+                </h2>
+
+                <p>
+                    Emergency support, blood donation and medical help.
+                </p>
+
+                <a href="https://indianredcross.org"
+                   target="_blank">
+
+                    Visit Website
+
+                </a>
+
+            </div>
+
+            <!-- WHO -->
+
+            <div class="important-card">
+
+                <i class="fa-solid fa-earth-asia"></i>
+
+                <h2>
+                    World Health Organization
+                </h2>
+
+                <p>
+                    Global healthcare information and disease updates.
+                </p>
+
+                <a href="https://www.who.int"
+                   target="_blank">
+
+                    Visit Website
+
+                </a>
+
+            </div>
+
+            <!-- BLOOD -->
+
+            <div class="important-card">
+
+                <i class="fa-solid fa-droplet"></i>
+
+                <h2>
+                    Blood Bank Search
+                </h2>
+
+                <p>
+                    Find nearby blood banks and emergency blood support.
+                </p>
+
+                <a href="https://eraktkosh.mohfw.gov.in"
+                   target="_blank">
+
+                    Visit Website
+
+                </a>
+
+            </div>
+
+            <!-- GOVT HEALTH -->
+
+            <div class="important-card">
+
+                <i class="fa-solid fa-shield-heart"></i>
+
+                <h2>
+                    Ministry of Health
+                </h2>
+
+                <p>
+                    Official Indian healthcare ministry and medical resources.
+                </p>
+
+                <a href="https://www.mohfw.gov.in"
+                   target="_blank">
+
+                    Visit Website
+
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- BACK BUTTON -->
+
+        <div class="back-home">
+
+            <a href="{{ url_for('home') }}"
+
+                ← Back To Home
+
+            </a>
+
+        </div>
+
+    </section>
+
+</body>
+
+</html>
