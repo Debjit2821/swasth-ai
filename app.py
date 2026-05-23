@@ -46,6 +46,12 @@ import random
 
 
 app = Flask(__name__)
+app.config.update(
+
+    SESSION_COOKIE_SAMESITE="None",
+
+    SESSION_COOKIE_SECURE=True
+)
 oauth = OAuth(app)
 
 google = oauth.register(
