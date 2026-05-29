@@ -1151,10 +1151,17 @@ def add_report(appointment_id):
     
     # RELATED CASE
 
+    if not appointment.case_id:
+        flash("No case is linked to this appointment.", "danger")
+        return redirect(url_for("supervisor_appointments"))
+
     related_case = Case.query.get(
         appointment.case_id
     )
 
+    if not related_case:
+        flash("Related case not found.", "danger")
+        return redirect(url_for("supervisor_appointments"))
     if request.method == "POST":
 
         diagnosis = request.form[
