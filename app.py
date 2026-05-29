@@ -344,8 +344,11 @@ def dashboard():
 
     reports = (
     Report.query
+    .join(Case)
+    .filter(
+        Case.user_id == current_user.id
+    )
     .order_by(Report.id.desc())
-    .limit(10)
     .all()
 )
 
@@ -1785,9 +1788,7 @@ def medical_reports():
     reports = (
         Report.query
         .join(Case)
-        .filter(
-            Case.user_id == current_user.id
-        )
+        .filter(Case.user_id == current_user.id)
         .order_by(Report.id.desc())
         .all()
     )
