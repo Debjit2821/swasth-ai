@@ -146,20 +146,21 @@ body{
 
         <img src="https://i.pravatar.cc/150?img=12">
 
-        <h3>John Doe</h3>
+        <h3>{{ current_user.name }}</h3>
 
-        <p>Patient ID: SWA-1025</p>
+        <p>Patient ID: {{ current_user.id }}</p>
 
         <div class="info-box">
-            Security Score: 92%
+            Security Score: 98%
+        </div>
+            <div class="info-box">
+        Last Login:
+    <span id="currentTime"></span>
+</div>
         </div>
 
         <div class="info-box">
-            Last Login: Today 10:35 AM
-        </div>
-
-        <div class="info-box">
-            Connected Devices: 3
+            Connected Devices: 2
         </div>
 
     </div>
@@ -179,9 +180,9 @@ body{
                 <label>Full Name</label>
 
                 <input
-                type="text"
-                class="form-control"
-                value="John Doe">
+type="text"
+class="form-control"
+value="{{ current_user.name }}">
 
             </div>
 
@@ -189,10 +190,7 @@ body{
 
                 <label>Email</label>
 
-                <input
-                type="email"
-                class="form-control"
-                value="john@example.com">
+                 
 
             </div>
 
@@ -201,9 +199,9 @@ body{
                 <label>Phone Number</label>
 
                 <input
-                type="text"
-                class="form-control"
-                value="+91 9876543210">
+                  type="text"
+                    class="form-control"    
+                    value="{{ current_user.phone }}">       
 
             </div>
 
@@ -306,6 +304,37 @@ body{
 </div>
 
 </div>
+<script>
+
+function updateTime(){
+
+    const now = new Date();
+
+    const options = {
+        timeZone: "Asia/Kolkata",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    };
+
+    document.getElementById(
+        "currentTime"
+    ).innerHTML =
+        now.toLocaleTimeString(
+            "en-IN",
+            options
+        );
+
+}
+
+updateTime();
+
+setInterval(
+    updateTime,
+    1000
+);
+
+</script>
 
 </body>
 </html>
