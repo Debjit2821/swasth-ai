@@ -352,6 +352,14 @@ def dashboard():
     appointments = Appointment.query.filter_by(
         patient_id=current_user.id
     ).all()
+    upcoming_appointment = (
+    Appointment.query.filter_by(
+        patient_id=current_user.id,
+        status="Scheduled"
+    )
+    .order_by(Appointment.id.desc())
+    .first()
+)
 
     supervisors = User.query.filter_by(
         role="supervisor"
@@ -371,6 +379,7 @@ def dashboard():
         user_cases=user_cases,
         reports=reports,
         appointments=appointments,
+        upcoming_appointment=upcoming_appointment
         supervisors=supervisors,
         notifications=notifications
     )

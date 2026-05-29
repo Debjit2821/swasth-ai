@@ -237,21 +237,43 @@ body{
 
                 <h4>Upcoming Appointments</h4>
 
+                {% if upcoming_appointment %}
+                            
                 <div class="appointment">
-
+                
                     <div>
-
-                        <strong>Dr. Sarah Johnson</strong><br>
-                        Cardiologist<br>
-                        Tomorrow • 11:00 AM
-
+                    
+                        <strong>
+                            Appointment Scheduled
+                        </strong><br>
+                    
+                        Date:
+                        {{ upcoming_appointment.appointment_date }}<br>
+                    
+                        Time:
+                        {{ upcoming_appointment.appointment_time }}
+                    
                     </div>
-
+                
                     <span class="badge-custom">
-                        Confirmed
+                        {{ upcoming_appointment.status }}
                     </span>
-
+                
                 </div>
+                
+                {% else %}
+                
+                <div class="appointment">
+                
+                    <div>
+                    
+                        No upcoming appointments.
+                    
+                    </div>
+                
+                </div>
+                
+                {% endif %}
 
             </div>
 
