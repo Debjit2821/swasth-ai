@@ -303,12 +303,12 @@ body{
                 
                     <div class="section">
                     
-                        <h4>Active Consultation</h4>
-                    
+                        <<h4>Active Consultation</h4>
+
                         {% if user_cases %}
-                    
+
                             {% set latest_case = user_cases[0] %}
-                    
+
                             <h5>
                                 Consultation #{{ latest_case.id }}
                             </h5>
@@ -317,10 +317,15 @@ body{
                                 {{ latest_case.ai_response[:150] }}
                             </p>
                         
-                            <button class="btn btn-primary">
+                            <a href="{{ url_for('home') }}"
+                               class="btn btn-primary">
                                 Continue Consultation
-                            </button>
+                            </a>
                         
+                            <a href="{{ url_for('case_timeline', case_id=latest_case.id) }}"
+                               class="btn btn-dark">
+                                View Timeline
+                            </a>
                         {% else %}
                         
                             <p>
