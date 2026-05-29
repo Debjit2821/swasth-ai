@@ -207,27 +207,27 @@ body{
 
     <div class="stats">
 
-        <div class="stat-card">
-            <small>Total Consultations</small>
-            <h2>12</h2>
-        </div>
-
-        <div class="stat-card">
-            <small>Appointments</small>
-            <h2>4</h2>
-        </div>
-
-        <div class="stat-card">
-            <small>Medical Reports</small>
-            <h2>8</h2>
-        </div>
-
-        <div class="stat-card">
-            <small>Health Score</small>
-            <h2>85%</h2>
-        </div>
-
+    <div class="stat-card">
+        <small>Total Consultations</small>
+        <h2>{{ user_cases|length }}</h2>
     </div>
+
+    <div class="stat-card">
+        <small>Appointments</small>
+        <h2>{{ appointments|length }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <small>Medical Reports</small>
+        <h2>{{ reports|length }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <small>Notifications</small>
+        <h2>{{ notifications|length }}</h2>
+    </div>
+
+</div>
 
     <div class="row">
 
@@ -314,40 +314,33 @@ body{
             </div>
 
         </div>
-
-        <div class="col-lg-4">
-
-            <div class="section text-center">
-
-                <div class="stat-card">
-    <small>Active Cases</small>
-    <h2>2</h2>
-</div>
-
-            </div>
-
-           <div class="section">
-
-    <h4>Upcoming Tasks</h4>
-
-    <hr>
-
-    <div class="mb-3">
-        <strong>Doctor Appointment</strong><br>
-        Tomorrow • 11:00 AM
-    </div>
-
-    <div class="mb-3">
-        <strong>Upload Blood Report</strong><br>
-        Pending
-    </div>
-
-    <div>
-        <strong>Follow-up Consultation</strong><br>
-        Next Week
-    </div>
-
-</div>
+        <div class="section">
+        
+            <h4>Notifications</h4>
+        
+            <hr>
+        
+            {% if notifications %}
+        
+                {% for notification in notifications %}
+        
+                <div class="mb-3">
+                
+                    {{ notification.message }}
+                
+                </div>
+            
+                <hr>
+            
+                {% endfor %}
+            
+            {% else %}
+            
+                <p>No notifications available.</p>
+            
+            {% endif %}
+            
+        </div>
 
         </div>
 
