@@ -172,11 +172,11 @@ body{
     <a href="{{ url_for('book_appointment') }}">
         📅 Appointments
     </a>
-
+    {% for report in reports %}
     <a href="{{ url_for('view_report', report_id=report.id) }}">
         📄 Medical Reports
     </a>
-
+    {% endfor %}
     <a href="{{ url_for('doctors') }}">
         👨‍⚕️ Doctors
     </a>
