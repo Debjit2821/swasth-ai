@@ -1771,6 +1771,13 @@ def complete_profile():
     return render_template(
         "complete_profile.html"
     )
+@app.route("/settings")
+@login_required
+def settings():
+
+    return render_template(
+        "settings.html"
+    )
 
 if __name__ == "__main__":
 
