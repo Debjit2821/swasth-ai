@@ -139,15 +139,12 @@ class Report(db.Model):
         db.DateTime,
         server_default=db.func.now()
     )
-# APPOINTMENT MODEL
 class Appointment(db.Model):
 
- 
-
     case_id = db.Column(
-    db.Integer,
-    db.ForeignKey('case.id')
-)
+        db.Integer,
+        db.ForeignKey('case.id')
+    )
 
     id = db.Column(db.Integer, primary_key=True)
 
@@ -161,12 +158,24 @@ class Appointment(db.Model):
         db.ForeignKey('user.id')
     )
 
+    supervisor = db.relationship(
+        "User",
+        foreign_keys=[supervisor_id]
+    )
+
+    patient = db.relationship(
+        "User",
+        foreign_keys=[patient_id]
+    )
+
     appointment_date = db.Column(
         db.String(100),
         nullable=False
     )
 
-    appointment_time = db.Column(db.String(50))
+    appointment_time = db.Column(
+        db.String(50)
+    )
 
     status = db.Column(
         db.String(50),

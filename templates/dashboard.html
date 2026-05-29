@@ -244,19 +244,21 @@ body{
                     <div>
                     
                         <strong>
-                            Appointment Scheduled
+                            Dr. {{ upcoming_appointment.supervisor.name }}
                         </strong><br>
                     
-                        Date:
-                        {{ upcoming_appointment.appointment_date }}<br>
+                        {{ upcoming_appointment.supervisor.specialization }}<br>
                     
-                        Time:
+                        {{ upcoming_appointment.appointment_date }}
+                        •
                         {{ upcoming_appointment.appointment_time }}
                     
                     </div>
                 
                     <span class="badge-custom">
+                    
                         {{ upcoming_appointment.status }}
+                    
                     </span>
                 
                 </div>
@@ -274,8 +276,6 @@ body{
                 </div>
                 
                 {% endif %}
-
-            </div>
 
             <div class="section">
 
