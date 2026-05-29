@@ -439,26 +439,32 @@ def book_appointment():
     if request.method == "POST":
 
         supervisor_id = request.form["supervisor_id"]
-
         appointment_date = request.form["appointment_date"]
-
+    
+        active_case = Case.query.filter_by(
+            user_id=current_user.id,
+            status="Pending"
+        ).first()
+    
+        if not active_case:
+            flash(
+                "Please create a medical case before booking an appointment.",
+                "danger"
+            )
+            return redirect(url_for("home"))
+    
         new_appointment = Appointment(
             patient_id=current_user.id,
             supervisor_id=supervisor_id,
-            appointment_date=appointment_date
+            appointment_date=appointment_date,
+            case_id=active_case.id
         )
-
+    
         db.session.add(new_appointment)
-
         db.session.commit()
-
-        return "Appointment Booked Successfully"
-
-    return render_template(
-        "book_appointment.html",
-        supervisors=supervisors
-    )
-
+    
+        flash("Appointment Booked Successfully", "success")
+        return redirect(url_for("dashboard"))
 
 # HOME CHATBOT
 
