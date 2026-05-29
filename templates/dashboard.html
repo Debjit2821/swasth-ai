@@ -320,6 +320,11 @@ body{
                                class="btn btn-primary">
                                 Continue Consultation
                             </a>
+
+                            <a href="/close-consultation/{{ report.case_id }}"
+                                class="btn btn-success">
+                                End Consultation
+                            </a>
                         
                             <a href="{{ url_for('case_timeline', case_id=latest_case.id) }}"
                                class="btn btn-dark">
