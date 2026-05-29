@@ -379,7 +379,7 @@ def dashboard():
         user_cases=user_cases,
         reports=reports,
         appointments=appointments,
-        upcoming_appointment=upcoming_appointment
+        upcoming_appointment=upcoming_appointment,
         supervisors=supervisors,
         notifications=notifications
     )
