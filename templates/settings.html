@@ -188,8 +188,11 @@ value="{{ current_user.name }}">
 
             <div class="col-md-6 mb-3">
 
-                <label>Email</label>
-
+                <label>email</label>
+                <input
+                  type="text"
+                    class="form-control"    
+                    value="{{ current_user.email }}"> 
                  
 
             </div>
@@ -201,7 +204,7 @@ value="{{ current_user.name }}">
                 <input
                   type="text"
                     class="form-control"    
-                    value="{{ current_user.phone }}">       
+                    value="{{ current_user.phone_number }}">       
 
             </div>
 
