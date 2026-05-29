@@ -1,436 +1,380 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>SWASTH-AI Dashboard</title>
+<title>SWASTH-AI Dashboard</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    background:#f4f8fc;
+}
+
+.sidebar{
+    width:260px;
+    height:100vh;
+    position:fixed;
+    left:0;
+    top:0;
+    background:#0f172a;
+    color:white;
+    padding:25px;
+}
+
+.logo{
+    font-size:24px;
+    font-weight:700;
+    margin-bottom:40px;
+}
+
+.sidebar a{
+    display:block;
+    color:#cbd5e1;
+    text-decoration:none;
+    padding:14px;
+    border-radius:12px;
+    margin-bottom:10px;
+    transition:.3s;
+}
+
+.sidebar a:hover{
+    background:#1e293b;
+    color:white;
+}
+
+.main{
+    margin-left:260px;
+    padding:30px;
+}
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.profile{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.profile img{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+}
+
+.hero{
+    background:linear-gradient(135deg,#2563eb,#38bdf8);
+    color:white;
+    border-radius:25px;
+    padding:30px;
+    margin-bottom:30px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    margin-bottom:30px;
+}
+
+.stat-card{
+    background:white;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+
+.stat-card h2{
+    margin-top:10px;
+    font-weight:700;
+}
+
+.section{
+    background:white;
+    border-radius:20px;
+    padding:25px;
+    margin-bottom:25px;
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+
+.appointment{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px;
+    border-radius:15px;
+    background:#f8fafc;
+    margin-top:15px;
+}
+
+.badge-custom{
+    background:#22c55e;
+    color:white;
+    padding:8px 15px;
+    border-radius:20px;
+}
+
+.progress{
+    height:10px;
+}
+
+@media(max-width:768px){
+
+.sidebar{
+    width:100%;
+    height:auto;
+    position:relative;
+}
+
+.main{
+    margin-left:0;
+}
+
+}
+
+</style>
 
 </head>
 
-<body class="bg-light">
+<body>
 
-    <!-- NAVBAR -->
+<div class="sidebar">
 
-    <nav class="navbar navbar-dark bg-primary px-4">
+    <div class="logo">
+        🏥 SWASTH-AI
+    </div>
 
-        <span class="navbar-brand">
+    <a href="#">📊 Dashboard</a>
+    <a href="#">🤖 AI Consultation</a>
+    <a href="#">📅 Appointments</a>
+    <a href="#">📄 Medical Reports</a>
+    <a href="#">👨‍⚕️ Doctors</a>
+    <a href="#">⚙ Settings</a>
+    <a href="#">🚪 Logout</a>
 
-            SWASTH-AI Dashboard
+</div>
 
-        </span>
+<div class="main">
 
-        <div>
+    <div class="topbar">
 
-            <a href="/home" class="btn btn-light me-2">
+        <h2>
+            Patient Dashboard
+        </h2>
 
-                AI Chat
+        <div class="profile">
 
-            </a>
+            <img src="https://i.pravatar.cc/150?img=12">
 
-            <a href="/logout" class="btn btn-light">
-
-                Logout
-
-            </a>
+            <div>
+                <strong>John Doe</strong><br>
+                Patient
+            </div>
 
         </div>
 
-    </nav>
-    
-    <a
-    href="https://wa.me/14155238886?text=join%20aid-chose"
-    target="_blank"
-    class="btn btn-success btn-lg"
->
+    </div>
 
-    Enable WhatsApp Notifications 📲
+    <div class="hero">
 
-</a>
+        <h2>Welcome Back 👋</h2>
 
-    <div class="container mt-5">
-
-        <!-- NOTIFICATIONS -->
-
-        <h2 class="mb-4">
-
-            Notifications
-
-        </h2>
-
-        {% if notifications %}
-
-            {% for notification in notifications[::-1] %}
-
-                <div class="alert alert-warning shadow-sm">
-
-                    🔔 {{ notification.message }}
-
-                </div>
-
-            {% endfor %}
-
-        {% else %}
-
-            <div class="alert alert-light mb-5">
-
-                No notifications yet.
-
-            </div>
-
-        {% endif %}
-
-        <!-- APPOINTMENTS -->
-
-        <h2 class="mb-4">
-
-            Appointments
-
-        </h2>
-
-        {% if appointments %}
-
-            {% for appointment in appointments %}
-
-                <div class="card shadow border-0 rounded-4 mb-4">
-
-                    <div class="card-body">
-
-                        <h4>
-
-                            Consultation Appointment
-
-                        </h4>
-
-                        {% for doctor in supervisors %}
-
-                            {% if doctor.id == appointment.supervisor_id %}
-
-                                <p>
-
-                                    <strong>Doctor:</strong>
-
-                                    Dr. {{ doctor.name }}
-
-                                </p>
-
-                                <p>
-
-                                    <strong>Specialization:</strong>
-
-                                    {{ doctor.specialization }}
-
-                                </p>
-
-                            {% endif %}
-
-                        {% endfor %}
-
-                        <p>
-
-                            <strong>Date:</strong>
-
-                            {{ appointment.appointment_date }}
-
-                        </p>
-
-                        <p>
-
-                            <strong>Time:</strong>
-
-                            {{ appointment.appointment_time }}
-
-                        </p>
-
-                        <p>
-
-                            <strong>Status:</strong>
-
-                            {% if appointment.status == "Completed" %}
-
-                                <span class="badge bg-success">
-
-                                    Completed
-
-                                </span>
-
-                            {% else %}
-
-                                <span class="badge bg-primary">
-
-                                    {{ appointment.status }}
-
-                                </span>
-
-                            {% endif %}
-
-                        </p>
-
-                    </div>
-
-                </div>
-
-            {% endfor %}
-
-        {% else %}
-
-            <div class="alert alert-info mb-5">
-
-                No appointments scheduled.
-
-            </div>
-
-        {% endif %}
-
-        <!-- ACTIVE CONSULTATIONS -->
-
-        <h2 class="mb-4">
-
-            Active Consultations
-
-        </h2>
-
-        {% set active_found = false %}
-
-        {% for case in user_cases %}
-
-            {% if case.status == "Pending" %}
-
-                {% set active_found = true %}
-
-                <div class="card shadow border-0 rounded-4 mb-4">
-
-                    <div class="card-body">
-
-                        <div class="d-flex justify-content-between">
-
-                            <h4>
-
-                                Consultation #{{ case.id }}
-
-                            </h4>
-
-                            {% if case.danger_level == "High" %}
-
-                                <span class="badge bg-danger">
-
-                                    HIGH RISK
-
-                                </span>
-
-                            {% elif case.danger_level == "Medium" %}
-
-                                <span class="badge bg-warning text-dark">
-
-                                    MEDIUM RISK
-
-                                </span>
-
-                            {% else %}
-
-                                <span class="badge bg-success">
-
-                                    LOW RISK
-
-                                </span>
-
-                            {% endif %}
-
-                        </div>
-
-                        <hr>
-
-                        <p>
-
-                            <strong>AI Summary:</strong>
-
-                        </p>
-
-                        <div class="alert alert-primary">
-
-                            {{ case.ai_summary }}
-
-                        </div>
-
-                        <p>
-
-                            <strong>Conversation Stage:</strong>
-
-                            {{ case.conversation_stage }}
-
-                        </p>
-
-                        <!-- BUTTONS -->
-
-                        <div class="mt-3">
-
-                            <a
-                                href="/home"
-                                class="btn btn-primary">
-
-                                Continue Consultation
-
-                            </a>
-
-                            <a
-                                href="/case-timeline/{{ case.id }}"
-                                class="btn btn-dark ms-2">
-
-                                View Timeline
-
-                            </a>
-
-                            <a
-                                href="/close-consultation/{{ case.id }}"
-                                class="btn btn-danger ms-2">
-
-                                Close Consultation
-
-                            </a>
-
-                        </div>
-
-                        <!-- REPORTS -->
-
-                        <div class="mt-4">
-
-                            <h5>
-
-                                Medical Reports
-
-                            </h5>
-
-                            {% for report in reports %}
-
-                                {% if report.case_id == case.id %}
-
-                                    <a
-                                        href="/view-report/{{ report.id }}"
-                                        class="btn btn-outline-success mt-2">
-
-                                        View Medical Report
-
-                                    </a>
-
-                                {% endif %}
-
-                            {% endfor %}
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            {% endif %}
-
-        {% endfor %}
-
-        {% if not active_found %}
-
-            <div class="alert alert-info mb-5">
-
-                No active consultations.
-
-            </div>
-
-        {% endif %}
-
-        <!-- PREVIOUS CONSULTATIONS -->
-
-        <h2 class="mb-4">
-
-            Previous Consultations
-
-        </h2>
-
-        {% set previous_found = false %}
-
-        {% for case in user_cases %}
-
-            {% if case.status == "Resolved" %}
-
-                {% set previous_found = true %}
-
-                <div class="card shadow border-0 rounded-4 mb-4">
-
-                    <div class="card-body">
-
-                        <h4>
-
-                            Consultation #{{ case.id }}
-
-                        </h4>
-
-                        <p>
-
-                            <strong>Status:</strong>
-
-                            <span class="badge bg-success">
-
-                                Resolved
-
-                            </span>
-
-                        </p>
-
-                        <div class="alert alert-secondary">
-
-                            {{ case.ai_summary }}
-
-                        </div>
-
-                        <a
-                            href="/case-timeline/{{ case.id }}"
-                            class="btn btn-dark mt-2">
-
-                            View Timeline
-
-                        </a>
-
-                        <!-- REPORTS -->
-
-                        <div class="mt-3">
-
-                            {% for report in reports %}
-
-                                {% if report.case_id == case.id %}
-
-                                    <a
-                                        href="/view-report/{{ report.id }}"
-                                        class="btn btn-outline-success">
-
-                                        View Medical Report
-
-                                    </a>
-
-                                {% endif %}
-
-                            {% endfor %}
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            {% endif %}
-
-        {% endfor %}
-
-        {% if not previous_found %}
-
-            <div class="alert alert-info">
-
-                No previous consultations found.
-
-            </div>
-
-        {% endif %}
+        <p>
+            Monitor your health, appointments, reports and AI consultations in one place.
+        </p>
 
     </div>
 
-</body>
+    <div class="stats">
 
+        <div class="stat-card">
+            <small>Total Consultations</small>
+            <h2>12</h2>
+        </div>
+
+        <div class="stat-card">
+            <small>Appointments</small>
+            <h2>4</h2>
+        </div>
+
+        <div class="stat-card">
+            <small>Medical Reports</small>
+            <h2>8</h2>
+        </div>
+
+        <div class="stat-card">
+            <small>Health Score</small>
+            <h2>85%</h2>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-lg-8">
+
+            <div class="section">
+
+                <h4>Upcoming Appointments</h4>
+
+                <div class="appointment">
+
+                    <div>
+
+                        <strong>Dr. Sarah Johnson</strong><br>
+                        Cardiologist<br>
+                        Tomorrow • 11:00 AM
+
+                    </div>
+
+                    <span class="badge-custom">
+                        Confirmed
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="section">
+
+                <h4>Active Consultation</h4>
+
+                <br>
+
+                <h5>Consultation #15</h5>
+
+                <p>
+                    AI detected mild respiratory symptoms.
+                    Follow-up recommended.
+                </p>
+
+                <label>Recovery Progress</label>
+
+                <div class="progress">
+
+                    <div
+                    class="progress-bar bg-success"
+                    style="width:75%">
+                    </div>
+
+                </div>
+
+                <br>
+
+                <button class="btn btn-primary">
+                    Continue Consultation
+                </button>
+
+                <button class="btn btn-dark">
+                    View Timeline
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="section text-center">
+
+                <div class="stat-card">
+    <small>Active Cases</small>
+    <h2>2</h2>
+</div>
+
+            </div>
+
+           <div class="section">
+
+    <h4>Upcoming Tasks</h4>
+
+    <hr>
+
+    <div class="mb-3">
+        <strong>Doctor Appointment</strong><br>
+        Tomorrow • 11:00 AM
+    </div>
+
+    <div class="mb-3">
+        <strong>Upload Blood Report</strong><br>
+        Pending
+    </div>
+
+    <div>
+        <strong>Follow-up Consultation</strong><br>
+        Next Week
+    </div>
+
+</div>
+
+        </div>
+
+    </div>
+
+    <div class="section">
+
+        <h4>Medical History</h4>
+
+        <br>
+
+        <table class="table">
+
+            <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Condition</th>
+                    <th>Status</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>#12</td>
+                    <td>Fever</td>
+                    <td>
+                        <span class="badge bg-success">
+                            Resolved
+                        </span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>#14</td>
+                    <td>Headache</td>
+                    <td>
+                        <span class="badge bg-success">
+                            Resolved
+                        </span>
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
 </html>
