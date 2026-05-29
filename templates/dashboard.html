@@ -319,13 +319,13 @@ body{
                             <a href="{{ url_for('home') }}"
                                class="btn btn-primary">
                                 Continue Consultation
-                            </a>
-                            {% for report in reports %}
-                            <a href="/close-consultation/{{ report.case_id }}"
+                           {% if latest_case.status != "Resolved" %}
+                            <a href="/close-consultation/{{ latest_case.id }}"
                                 class="btn btn-success">
-                                End Consultation
+                                 End Consultation
                             </a>
-                            {% endfor %}
+                            {% endif %}
+                            
                             <a href="{{ url_for('case_timeline', case_id=latest_case.id) }}"
                                class="btn btn-dark">
                                 View Timeline
