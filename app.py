@@ -1102,7 +1102,8 @@ def complete_appointment(appointment_id):
 
     # START FOLLOW-UP FLOW
 
-    related_case.conversation_stage = "follow_up"
+    if related_case:
+        related_case.conversation_stage = "follow_up"
 
     # NOTIFICATION
 
