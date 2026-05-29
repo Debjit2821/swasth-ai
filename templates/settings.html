@@ -192,7 +192,7 @@ value="{{ current_user.name }}">
                 <input
                   type="text"
                     class="form-control"    
-                    value="{{ current_user.email }}"> 
+                    value="{{ current_user.mail }}"> 
                  
 
             </div>
@@ -307,35 +307,28 @@ value="{{ current_user.name }}">
 </div>
 
 </div>
+<div class="info-box">
+    Last Login:
+    <span id="lastLogin"></span>
+</div>
+
 <script>
 
-function updateTime(){
+function updateLastLogin() {
 
     const now = new Date();
 
-    const options = {
-        timeZone: "Asia/Kolkata",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit"
-    };
-
-    document.getElementById(
-        "currentTime"
-    ).innerHTML =
-        now.toLocaleTimeString(
+    document.getElementById("lastLogin").innerHTML =
+        now.toLocaleString(
             "en-IN",
-            options
+            {
+                timeZone: "Asia/Kolkata"
+            }
         );
 
 }
 
-updateTime();
-
-setInterval(
-    updateTime,
-    1000
-);
+updateLastLogin();
 
 </script>
 
