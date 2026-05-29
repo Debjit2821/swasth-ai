@@ -1778,6 +1778,24 @@ def settings():
     return render_template(
         "settings.html"
     )
+@app.route("/medical-reports")
+@login_required
+def medical_reports():
+
+    reports = (
+        Report.query
+        .join(Case)
+        .filter(
+            Case.user_id == current_user.id
+        )
+        .order_by(Report.id.desc())
+        .all()
+    )
+
+    return render_template(
+        "medical_reports.html",
+        reports=reports
+    )
 
 if __name__ == "__main__":
 

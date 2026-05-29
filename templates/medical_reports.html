@@ -1,0 +1,40 @@
+<h2>My Medical Reports</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>Report ID</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for report in reports %}
+
+        <tr>
+
+            <td>
+                Report #{{ report.id }}
+            </td>
+
+            <td>
+
+                <a
+                href="{{ url_for('view_report', report_id=report.id) }}"
+                class="btn btn-primary">
+
+                    View Report
+
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
