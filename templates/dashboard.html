@@ -302,7 +302,7 @@ body{
                 
                     <div class="section">
                     
-                        <<h4>Active Consultation</h4>
+                        <h4>Active Consultation</h4>
 
                         {% if user_cases %}
 
@@ -319,6 +319,7 @@ body{
                             <a href="{{ url_for('home') }}"
                                class="btn btn-primary">
                                 Continue Consultation
+                            </a>
                            {% if latest_case.status != "Resolved" %}
                             <a href="/close-consultation/{{ latest_case.id }}"
                                 class="btn btn-success">
