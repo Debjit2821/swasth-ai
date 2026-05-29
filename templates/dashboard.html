@@ -184,8 +184,11 @@ body{
             <img src="https://i.pravatar.cc/150?img=12">
 
             <div>
-                <strong>John Doe</strong><br>
-                Patient
+
+                <strong>{{ current_user.name }}</strong><br>
+
+                {{ current_user.role|capitalize }}
+
             </div>
 
         </div>
