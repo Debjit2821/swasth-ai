@@ -277,70 +277,75 @@ body{
 
                 {% endif %}
 
-            <div class="section">
+            <div class="row">
 
-                <h4>Active Consultation</h4>
-
-                <br>
-
-                <h5>Consultation #15</h5>
-
-                <p>
-                    AI detected mild respiratory symptoms.
-                    Follow-up recommended.
-                </p>
-
-                <label>Recovery Progress</label>
-
-                <div class="progress">
-
-                    <div
-                    class="progress-bar bg-success"
-                    style="width:75%">
+                <div class="col-lg-6">
+                
+                    <div class="section">
+                    
+                        <h4>Active Consultation</h4>
+                    
+                        {% if user_cases %}
+                    
+                            {% set latest_case = user_cases[0] %}
+                    
+                            <h5>
+                                Consultation #{{ latest_case.id }}
+                            </h5>
+                        
+                            <p>
+                                {{ latest_case.ai_response[:150] }}
+                            </p>
+                        
+                            <button class="btn btn-primary">
+                                Continue Consultation
+                            </button>
+                        
+                        {% else %}
+                        
+                            <p>
+                                No active consultation.
+                            </p>
+                        
+                        {% endif %}
+                        
                     </div>
-
-                </div>
-
-                <br>
-
-                <button class="btn btn-primary">
-                    Continue Consultation
-                </button>
-
-                <button class="btn btn-dark">
-                    View Timeline
-                </button>
-
-            </div>
-
-        </div>
-        <div class="section">
-        
-            <h4>Notifications</h4>
-        
-            <hr>
-        
-            {% if notifications %}
-        
-                {% for notification in notifications %}
-        
-                <div class="mb-3">
-                
-                    {{ notification.message }}
                 
                 </div>
             
-                <hr>
-            
-                {% endfor %}
-            
-            {% else %}
-            
-                <p>No notifications available.</p>
-            
-            {% endif %}
-            
-        </div>
+                <div class="col-lg-6">
+                
+                    <div class="section">
+                    
+                        <h4>Notifications</h4>
+                    
+                        <hr>
+                    
+                        {% if notifications %}
+                    
+                            {% for notification in notifications %}
+                    
+                                <div class="mb-3">
+                                
+                                    {{ notification.message }}
+                                
+                                </div>
+                            
+                                <hr>
+                            
+                            {% endfor %}
+                            
+                        {% else %}
+                            
+                            <p>No notifications available.</p>
+                            
+                        {% endif %}
+                            
+                    </div>
+                
+                </div>
+
+</div>
 
         </div>
 
